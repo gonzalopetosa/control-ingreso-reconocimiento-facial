@@ -1,11 +1,16 @@
 import cv2
+import os
 
 # Cargar el clasificador pre-entrenado de rostros (Haar Cascade)
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml") #permite detectar rostros sin nesecidad de entrenar un modelo.
 
+# Crear carpeta para guardar fotos si no existe
+output_folder = "C:/Users/gonza/Desktop/TP-Inicial/Data"
+os.makedirs(output_folder, exist_ok=True)
+
 # Iniciar la cámara
 cap = cv2.VideoCapture(0)
-
+count = 0
 while True:
     # Capturar frame por frame
     ret, frame = cap.read()
@@ -25,8 +30,22 @@ while True:
     # Mostrar el video en una ventana
     cv2.imshow("Detección de Rostros - OpenCV", frame)
 
-    # Presionar 'q' para salir
-    if cv2.waitKey(1) & 0xFF == ord('q'):
+    key = cv2.waitKey(1) & 0xFF
+
+    # Guardar foto si presiono "s"
+    if key == ord("s"):
+        if len(faces) > 0:
+            for (x, y, w, h) in faces:
+                rostro = frame[y:y+h, x:x+w]  # recortar rostro
+                filename = os.path.join(output_folder, f"rostro_{count}.jpg")
+                cv2.imwrite(filename, rostro)
+                print(f"Foto guardada: {filename}")
+                count += 1
+        else:
+            print("⚠ No se detectó ningún rostro para guardar")
+
+    # Salir con "q"
+    if key == ord("q"):
         break
 
 # Liberar cámara y cerrar ventanas
