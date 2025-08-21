@@ -1,0 +1,6 @@
+proveedor_id,nombre,calidad,lead_time_dias,porcentaje_rechazos
+1,Molinos Rio Cuarto,Alta,10,0
+2,Aceites SA,Media,4,0.05
+3,Azucar del Norte,Media,4,0.03
+4,Salinas SRL,Baja,2,0.04
+5,Envapack,Baja,3,0.09
