@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-body">
+                <h1 class="card-title">Sistema de Gestión PyME Alimenticia</h1>
+                <p class="card-text">Bienvenido al sistema de análisis y visualización de datos para la PyME alimenticia.</p>
+                
+                <div class="row mt-4">
+                    <div class="col-md-4">
+                        <div class="card summary-card">
+                            <div class="card-body">
+                                <i class="bi bi-arrow-left-right text-primary" style="font-size: 2rem;"></i>
+                                <h3>Ingresos/Egresos</h3>
+                                <div class="summary-number">20</div>
+                                <p class="text-muted">Registros del día</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card summary-card">
+                            <div class="card-body">
+                                <i class="bi bi-box-seam text-success" style="font-size: 2rem;"></i>
+                                <h3>Productos</h3>
+                                <div class="summary-number">5</div>
+                                <p class="text-muted">Tipos diferentes</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card summary-card">
+                            <div class="card-body">
+                                <i class="bi bi-people text-info" style="font-size: 2rem;"></i>
+                                <h3>Empleados</h3>
+                                <div class="summary-number">8</div>
+                                <p class="text-muted">En plantilla</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <a href="/desperdicios" class="btn btn-primary btn-lg">
+                        <i class="bi bi-bar-chart"></i> Ver Análisis de Desperdicios
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

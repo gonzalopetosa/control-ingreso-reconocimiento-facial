@@ -1,0 +1,11 @@
+id_operacion,fecha,id_empleado,nombre,tipo_operacion,vehiculo,hora_inicio,hora_fin
+OP001,2025-08-23,105,Ana,Descarga,Camión B,13:18,14:54
+OP002,2025-08-23,105,Ana,Carga,Camión C,11:36,15:48
+OP003,2025-08-23,101,Laura,Descarga,Camión B,11:24,17:37
+OP004,2025-08-23,106,Carlos,Carga,Camión C,12:42,15:01
+OP005,2025-08-23,105,Ana,Carga,Camioneta D,11:22,15:13
+OP006,2025-08-23,107,Lucía,Carga,Camión B,10:47,16:41
+OP007,2025-08-23,103,Sofía,Carga,Camión B,13:23,15:49
+OP008,2025-08-23,105,Ana,Carga,Camión A,10:46,14:19
+OP009,2025-08-23,103,Sofía,Descarga,Camioneta D,11:23,15:38
+OP010,2025-08-23,101,Laura,Descarga,Camioneta D,12:22,17:59

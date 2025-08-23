@@ -1,0 +1,16 @@
+id_lote,fecha_produccion,producto,id_empleado,nombre,rol
+L001,2025-08-23,Medialunas,104,Pedro,Cocinero
+L001,2025-08-23,Pan Integral,107,Lucía,Control Calidad
+L001,2025-08-23,Galletas,101,Laura,Control Calidad
+L002,2025-08-23,Bizcochos,105,Ana,Supervisor
+L002,2025-08-23,Tortas,101,Laura,Control Calidad
+L002,2025-08-23,Bizcochos,103,Sofía,Cocinero
+L003,2025-08-23,Tortas,104,Pedro,Supervisor
+L003,2025-08-23,Galletas,101,Laura,Empaquetador
+L003,2025-08-23,Bizcochos,106,Carlos,Empaquetador
+L004,2025-08-23,Tortas,102,Martín,Supervisor
+L004,2025-08-23,Bizcochos,108,Diego,Control Calidad
+L004,2025-08-23,Medialunas,104,Pedro,Supervisor
+L005,2025-08-23,Pan Integral,104,Pedro,Cocinero
+L005,2025-08-23,Bizcochos,107,Lucía,Empaquetador
+L005,2025-08-23,Bizcochos,101,Laura,Supervisor
