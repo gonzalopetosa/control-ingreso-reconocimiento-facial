@@ -1,0 +1,17 @@
+id_empleado,nombre,area_critica,autorizado
+101,Laura,Cámara Fría,No
+101,Laura,Depósito,No
+102,Martín,Cámara Fría,No
+102,Martín,Depósito,No
+103,Sofía,Cámara Fría,No
+103,Sofía,Depósito,No
+104,Pedro,Cámara Fría,Sí
+104,Pedro,Depósito,Sí
+105,Ana,Cámara Fría,Sí
+105,Ana,Depósito,Sí
+106,Carlos,Cámara Fría,Sí
+106,Carlos,Depósito,Sí
+107,Lucía,Cámara Fría,No
+107,Lucía,Depósito,Sí
+108,Diego,Cámara Fría,Sí
+108,Diego,Depósito,Sí
