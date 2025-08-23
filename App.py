@@ -7,7 +7,8 @@ from datetime import datetime
 
 app = Flask(__name__)
 
-SAVE_DIR = r"C:\Users\gonza\Desktop\TP-Inicial\Data"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+SAVE_DIR = os.path.join(BASE_DIR, "data")   # usa la misma carpeta 'data'
 os.makedirs(SAVE_DIR, exist_ok=True)
 
 # Cargar el clasificador HaarCascade

@@ -13,7 +13,8 @@ app = Flask(__name__)
 
 # --- 2. Carga de los Datasets en Memoria ---
 # Para eficiencia, cargamos los CSV una sola vez cuando la app se inicia.
-DATA_DIR = 'data'
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATA_DIR = os.path.join(BASE_DIR, "data")
 dataframes = {}
 
 # Diccionario para mapear nombres amigables a los archivos CSV
