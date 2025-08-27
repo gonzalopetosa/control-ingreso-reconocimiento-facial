@@ -14,6 +14,10 @@ os.makedirs(SAVE_DIR, exist_ok=True)
 # Cargar el clasificador HaarCascade
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
 
+@app.route('/')
+def index():
+    return render_template('capturar_imagen.html')
+
 @app.route("/capture_face", methods=["GET"])
 def capture_face():
     # Abrir la cámara (0 = cámara por defecto)
