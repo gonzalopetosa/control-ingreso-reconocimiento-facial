@@ -1,6 +1,24 @@
-fecha,turno,unidades_producidas,velocidad_ideal_upm
-01/08/2025,Mañana,9500,20
-02/08/2025,Tarde,8700,20
-03/08/2025,Noche,10000,20
-04/08/2025,Mañana,8800,20
-05/08/2025,Tarde,9400,20
+fecha,turno,unidades_producidas,velocidad_ideal_upm,velocidad_real_upm,producto
+01/08/2025,Mañana,9500,20,19.8,"Galletas de chocolate"
+02/08/2025,Tarde,8700,20,18.1,"Galletas de vainilla"
+03/08/2025,Noche,10000,20,20.8,"Galletas integrales"
+04/08/2025,Mañana,8800,20,18.3,"Galletas de avena"
+05/08/2025,Tarde,9400,20,19.6,"Galletas de mantequilla"
+06/08/2025,Noche,10200,20,21.3,"Galletas de limón"
+07/08/2025,Mañana,8900,20,18.5,"Galletas de coco"
+08/08/2025,Tarde,8600,20,17.9,"Galletas de jengibre"
+09/08/2025,Noche,10100,20,21.0,"Galletas de canela"
+10/08/2025,Mañana,9000,20,18.8,"Galletas de almendra"
+11/08/2025,Tarde,9300,20,19.4,"Galletas de nuez"
+12/08/2025,Noche,10300,20,21.5,"Galletas de avellana"
+13/08/2025,Mañana,8750,20,18.2,"Galletas de miel"
+14/08/2025,Tarde,9200,20,19.2,"Galletas de pasas"
+15/08/2025,Noche,10400,20,21.7,"Galletas de avena y miel"
+16/08/2025,Mañana,8850,20,18.4,"Galletas de chocolate blanco"
+17/08/2025,Tarde,9100,20,19.0,"Galletas de naranja"
+18/08/2025,Noche,10250,20,21.4,"Galletas de almendra y chocolate"
+19/08/2025,Mañana,8950,20,18.6,"Galletas de coco y limón"
+20/08/2025,Tarde,9350,20,19.5,"Galletas de vainilla y chips"
+21/08/2025,Noche,10500,20,21.9,"Galletas de avena y pasas"
+22/08/2025,Mañana,9050,20,18.9,"Galletas de jengibre y miel"
+23/08/2025,Tarde,8850,20,18.4,"Galletas de chocolate y nuez"
