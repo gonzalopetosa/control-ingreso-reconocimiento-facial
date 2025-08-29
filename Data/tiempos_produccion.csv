@@ -1,0 +1,6 @@
+fecha,turno,tiempo_planificado_min,tiempo_operativo_min,tiempo_parada_min
+01/08/2025,Mañana,480,450,30
+02/08/2025,Tarde,480,400,80
+03/08/2025,Noche,480,470,10
+04/08/2025,Mañana,480,420,60
+05/08/2025,Tarde,480,460,20

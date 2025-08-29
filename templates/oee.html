@@ -1,0 +1,242 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Detalles del Indicador OEE (Overall Equipment Effectiveness)</h2>
+                <p class="card-text">Eficiencia General de los Equipos por Turno</p>
+            </div>
+            <div class="card-body">
+                <!-- Gráfico principal -->
+                <div class="row mb-4">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-header bg-primary text-white">
+                                <h4>Indicador OEE por Turno</h4>
+                            </div>
+                            <div class="card-body">
+                                <img src="data:image/png;base64,{{ plot_url }}" class="img-fluid" alt="Gráfico OEE">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Métricas OEE -->
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        <div class="card text-center">
+                            <div class="card-header bg-info text-white">
+                                <h5>Disponibilidad</h5>
+                            </div>
+                            <div class="card-body">
+                                <h3 class="card-title">{{ "%.1f"|format(disponibilidad_promedio * 100) }}%</h3>
+                                <p class="card-text">Tiempo operativo vs tiempo planificado</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card text-center">
+                            <div class="card-header bg-success text-white">
+                                <h5>Rendimiento</h5>
+                            </div>
+                            <div class="card-body">
+                                <h3 class="card-title">{{ "%.1f"|format(rendimiento_promedio * 100) }}%</h3>
+                                <p class="card-text">Velocidad real vs velocidad ideal</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card text-center">
+                            <div class="card-header bg-warning text-white">
+                                <h5>Calidad</h5>
+                            </div>
+                            <div class="card-body">
+                                <h3 class="card-title">{{ "%.1f"|format(calidad_promedio * 100) }}%</h3>
+                                <p class="card-text">Unidades buenas vs unidades totales</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabla de datos -->
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4>Detalles por Turno</h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-striped table-hover">
+                                        <thead class="table-dark">
+                                            <tr>
+                                                <th>Fecha</th>
+                                                <th>Turno</th>
+                                                <th>Disponibilidad</th>
+                                                <th>Rendimiento</th>
+                                                <th>Calidad</th>
+                                                <th>OEE</th>
+                                                <th>Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for item in tabla_oee %}
+                                            <tr>
+                                                <td>{{ item.fecha.strftime('%d/%m/%Y') }}</td>
+                                                <td>{{ item.turno }}</td>
+                                                <td>{{ "%.1f"|format(item.Disponibilidad * 100) }}%</td>
+                                                <td>{{ "%.1f"|format(item.Rendimiento * 100) }}%</td>
+                                                <td>{{ "%.1f"|format(item.Calidad * 100) }}%</td>
+                                                <td>
+                                                    <span class="badge {% if item.OEE * 100 >= 85 %}bg-success{% elif item.OEE * 100 >= 65 %}bg-warning{% else %}bg-danger{% endif %}">
+                                                        {{ "%.1f"|format(item.OEE * 100) }}%
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#detalleModal{{ loop.index }}">
+                                                        <i class="bi bi-info-circle"></i> Detalles
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gráficos de componentes del OEE -->
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header bg-info text-white">
+                                <h4>Disponibilidad por Turno</h4>
+                            </div>
+                            <div class="card-body">
+                                <img src="data:image/png;base64,{{ plot_disponibilidad }}" class="img-fluid" alt="Gráfico Disponibilidad">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header bg-success text-white">
+                                <h4>Rendimiento por Turno</h4>
+                            </div>
+                            <div class="card-body">
+                                <img src="data:image/png;base64,{{ plot_rendimiento }}" class="img-fluid" alt="Gráfico Rendimiento">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header bg-warning text-white">
+                                <h4>Calidad por Turno</h4>
+                            </div>
+                            <div class="card-body">
+                                <img src="data:image/png;base64,{{ plot_calidad }}" class="img-fluid" alt="Gráfico Calidad">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header bg-primary text-white">
+                                <h4>Evolución del OEE</h4>
+                            </div>
+                            <div class="card-body">
+                                <img src="data:image/png;base64,{{ plot_evolucion }}" class="img-fluid" alt="Gráfico Evolución OEE">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modales para detalles -->
+                {% for item in tabla_oee %}
+                <div class="modal fade" id="detalleModal{{ loop.index }}" tabindex="-1" aria-labelledby="detalleModalLabel{{ loop.index }}" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="detalleModalLabel{{ loop.index }}">Detalles del Turno - {{ item.turno }} ({{ item.fecha.strftime('%d/%m/%Y') }})</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h6>Métricas de Producción</h6>
+                                        <ul class="list-group">
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                Tiempo planificado
+                                                <span class="badge bg-primary rounded-pill">{{ item.tiempo_planificado_min }} min</span>
+                                            </li>
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                Tiempo operativo
+                                                <span class="badge bg-primary rounded-pill">{{ item.tiempo_operativo_min }} min</span>
+                                            </li>
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                Velocidad ideal
+                                                <span class="badge bg-primary rounded-pill">{{ item.velocidad_ideal_upm }} UPM</span>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6>Resultados</h6>
+                                        <ul class="list-group">
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                Unidades producidas
+                                                <span class="badge bg-success rounded-pill">{{ item.unidades_producidas }}</span>
+                                            </li>
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                Unidades totales
+                                                <span class="badge bg-info rounded-pill">{{ item.unidades_totales }}</span>
+                                            </li>
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                Unidades defectuosas
+                                                <span class="badge bg-danger rounded-pill">{{ item.unidades_defectuosas }}</span>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="row mt-3">
+                                    <div class="col-md-12">
+                                        <h6>Indicadores Clave</h6>
+                                        <div class="progress mb-2" style="height: 30px;">
+                                            <div class="progress-bar bg-info" role="progressbar" style="width: {{ item.Disponibilidad * 100 }}%;" aria-valuenow="{{ item.Disponibilidad * 100 }}" aria-valuemin="0" aria-valuemax="100">
+                                                Disponibilidad: {{ "%.1f"|format(item.Disponibilidad * 100) }}%
+                                            </div>
+                                        </div>
+                                        <div class="progress mb-2" style="height: 30px;">
+                                            <div class="progress-bar bg-success" role="progressbar" style="width: {{ item.Rendimiento * 100 }}%;" aria-valuenow="{{ item.Rendimiento * 100 }}" aria-valuemin="0" aria-valuemax="100">
+                                                Rendimiento: {{ "%.1f"|format(item.Rendimiento * 100) }}%
+                                            </div>
+                                        </div>
+                                        <div class="progress mb-2" style="height: 30px;">
+                                            <div class="progress-bar bg-warning" role="progressbar" style="width: {{ item.Calidad * 100 }}%;" aria-valuenow="{{ item.Calidad * 100 }}" aria-valuemin="0" aria-valuemax="100">
+                                                Calidad: {{ "%.1f"|format(item.Calidad * 100) }}%
+                                            </div>
+                                        </div>
+                                        <div class="progress mb-2" style="height: 30px;">
+                                            <div class="progress-bar {% if item.OEE * 100 >= 85 %}bg-success{% elif item.OEE * 100 >= 65 %}bg-warning{% else %}bg-danger{% endif %}" role="progressbar" style="width: {{ item.OEE * 100 }}%;" aria-valuenow="{{ item.OEE * 100 }}" aria-valuemin="0" aria-valuemax="100">
+                                                OEE: {{ "%.1f"|format(item.OEE * 100) }}%
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

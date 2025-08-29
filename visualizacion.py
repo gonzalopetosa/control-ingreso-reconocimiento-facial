@@ -69,7 +69,44 @@ def procesar_datos_desperdicios():
 # --- 4. Rutas de la Aplicación Flask ---
 @app.route('/')
 def index():
-    return render_template('index.html')
+    # Obtener datos OEE para mostrar en el dashboard
+    df_oee = calcular_oee()
+
+    if df_oee is not None:
+        # Calcular OEE promedio
+        oee_promedio = df_oee['OEE'].mean() * 100
+
+        # Preparar gráfico OEE
+        plt.figure(figsize=(8, 4))
+        bars = plt.bar(df_oee["turno"] + " " + df_oee["fecha"].dt.strftime("%d-%m"), df_oee["OEE"]*100, color="royalblue")
+        plt.title("OEE por Turno", fontsize=14)
+        plt.ylabel("OEE (%)")
+        plt.xticks(rotation=45)
+
+        for bar in bars:
+            height = bar.get_height()
+            plt.text(bar.get_x() + bar.get_width()/2., height,
+                     f"{height:.1f}%", ha="center", va="bottom")
+
+        img = io.BytesIO()
+        plt.savefig(img, format="png", bbox_inches="tight")
+        img.seek(0)
+        oee_plot_url = base64.b64encode(img.getvalue()).decode()
+        plt.close()
+
+        # Preparar datos para la tabla
+        oee_data = df_oee.to_dict('records')
+
+        return render_template('index.html',
+                              oee_value="%.1f" % oee_promedio,
+                              oee_plot_url=oee_plot_url,
+                              oee_data=oee_data)
+    else:
+        # Si no hay datos OEE, mostrar valores por defecto
+        return render_template('index.html',
+                              oee_value="N/A",
+                              oee_plot_url="",
+                              oee_data=[])
 
 @app.route('/desperdicios')
 def mostrar_desperdicios():
@@ -315,5 +352,150 @@ def mostrar_inventario():
                           total_stock=total_stock,
                           productos_vencidos=productos_vencidos,
                           productos_por_vencer=productos_por_vencer)
+
+def calcular_oee():
+    try:
+        # Cargar datasets
+        tiempos = pd.read_csv(os.path.join(DATA_DIR, "tiempos_produccion.csv"), parse_dates=["fecha"])
+        produccion = pd.read_csv(os.path.join(DATA_DIR, "produccion_velocidad.csv"), parse_dates=["fecha"])
+        calidad = pd.read_csv(os.path.join(DATA_DIR, "calidad.csv"), parse_dates=["fecha"])
+
+        # Merge por fecha y turno
+        df = tiempos.merge(produccion, on=["fecha", "turno"]).merge(calidad, on=["fecha", "turno"])
+
+        # Calcular métricas
+        df["Disponibilidad"] = df["tiempo_operativo_min"] / df["tiempo_planificado_min"]
+        df["Rendimiento"] = df["unidades_producidas"] / (df["tiempo_operativo_min"] * df["velocidad_ideal_upm"])
+        df["Calidad"] = (df["unidades_totales"] - df["unidades_defectuosas"]) / df["unidades_totales"]
+        df["OEE"] = df["Disponibilidad"] * df["Rendimiento"] * df["Calidad"]
+
+        return df
+    except Exception as e:
+        print(f"Error al calcular OEE: {e}")
+        return None
+
+@app.route("/oee")
+def mostrar_oee():
+    df = calcular_oee()
+    if df is None:
+        return "No se pudo calcular OEE", 500
+
+    # Calcular promedios
+    disponibilidad_promedio = df["Disponibilidad"].mean()
+    rendimiento_promedio = df["Rendimiento"].mean()
+    calidad_promedio = df["Calidad"].mean()
+    oee_promedio = df["OEE"].mean()
+
+    # Gráfico principal OEE
+    plt.figure(figsize=(12, 6))
+    bars = plt.bar(df["turno"] + " " + df["fecha"].dt.strftime("%d-%m"), df["OEE"]*100,
+                   color=["royalblue" if x >= 0.85 else "orange" if x >= 0.65 else "red" for x in df["OEE"]])
+    plt.title("Indicador OEE por Turno", fontsize=16)
+    plt.ylabel("OEE (%)")
+    plt.axhline(y=85, color='green', linestyle='--', alpha=0.7, label='Excelente (85%)')
+    plt.axhline(y=65, color='orange', linestyle='--', alpha=0.7, label='Aceptable (65%)')
+    plt.legend()
+    plt.xticks(rotation=45)
+
+    for bar in bars:
+        height = bar.get_height()
+        plt.text(bar.get_x() + bar.get_width()/2., height,
+                 f"{height:.1f}%", ha="center", va="bottom")
+
+    img = io.BytesIO()
+    plt.savefig(img, format="png", bbox_inches="tight")
+    img.seek(0)
+    plot_url = base64.b64encode(img.getvalue()).decode()
+    plt.close()
+
+    # Gráfico de Disponibilidad
+    plt.figure(figsize=(10, 5))
+    bars = plt.bar(df["turno"] + " " + df["fecha"].dt.strftime("%d-%m"), df["Disponibilidad"]*100, color="lightblue")
+    plt.title("Disponibilidad por Turno", fontsize=14)
+    plt.ylabel("Disponibilidad (%)")
+    plt.xticks(rotation=45)
+
+    for bar in bars:
+        height = bar.get_height()
+        plt.text(bar.get_x() + bar.get_width()/2., height,
+                 f"{height:.1f}%", ha="center", va="bottom")
+
+    img_disp = io.BytesIO()
+    plt.savefig(img_disp, format="png", bbox_inches="tight")
+    img_disp.seek(0)
+    plot_disponibilidad = base64.b64encode(img_disp.getvalue()).decode()
+    plt.close()
+
+    # Gráfico de Rendimiento
+    plt.figure(figsize=(10, 5))
+    bars = plt.bar(df["turno"] + " " + df["fecha"].dt.strftime("%d-%m"), df["Rendimiento"]*100, color="lightgreen")
+    plt.title("Rendimiento por Turno", fontsize=14)
+    plt.ylabel("Rendimiento (%)")
+    plt.xticks(rotation=45)
+
+    for bar in bars:
+        height = bar.get_height()
+        plt.text(bar.get_x() + bar.get_width()/2., height,
+                 f"{height:.1f}%", ha="center", va="bottom")
+
+    img_rend = io.BytesIO()
+    plt.savefig(img_rend, format="png", bbox_inches="tight")
+    img_rend.seek(0)
+    plot_rendimiento = base64.b64encode(img_rend.getvalue()).decode()
+    plt.close()
+
+    # Gráfico de Calidad
+    plt.figure(figsize=(10, 5))
+    bars = plt.bar(df["turno"] + " " + df["fecha"].dt.strftime("%d-%m"), df["Calidad"]*100, color="gold")
+    plt.title("Calidad por Turno", fontsize=14)
+    plt.ylabel("Calidad (%)")
+    plt.xticks(rotation=45)
+
+    for bar in bars:
+        height = bar.get_height()
+        plt.text(bar.get_x() + bar.get_width()/2., height,
+                 f"{height:.1f}%", ha="center", va="bottom")
+
+    img_cal = io.BytesIO()
+    plt.savefig(img_cal, format="png", bbox_inches="tight")
+    img_cal.seek(0)
+    plot_calidad = base64.b64encode(img_cal.getvalue()).decode()
+    plt.close()
+
+    # Gráfico de Evolución del OEE
+    df_sorted = df.sort_values('fecha')
+    plt.figure(figsize=(10, 5))
+    for turno in df_sorted['turno'].unique():
+        df_turno = df_sorted[df_sorted['turno'] == turno]
+        plt.plot(df_turno['fecha'].dt.strftime("%d-%m"), df_turno['OEE']*100,
+                marker='o', label=f"Turno {turno}")
+
+    plt.title("Evolución del OEE", fontsize=14)
+    plt.ylabel("OEE (%)")
+    plt.xlabel("Fecha")
+    plt.legend()
+    plt.axhline(y=85, color='green', linestyle='--', alpha=0.7, label='Excelente (85%)')
+    plt.axhline(y=65, color='orange', linestyle='--', alpha=0.7, label='Aceptable (65%)')
+    plt.xticks(rotation=45)
+
+    img_evo = io.BytesIO()
+    plt.savefig(img_evo, format="png", bbox_inches="tight")
+    img_evo.seek(0)
+    plot_evolucion = base64.b64encode(img_evo.getvalue()).decode()
+    plt.close()
+
+    # Pasar tabla y gráficos al template
+    return render_template("oee.html",
+                         tabla_oee=df.to_dict("records"),
+                         plot_url=plot_url,
+                         plot_disponibilidad=plot_disponibilidad,
+                         plot_rendimiento=plot_rendimiento,
+                         plot_calidad=plot_calidad,
+                         plot_evolucion=plot_evolucion,
+                         disponibilidad_promedio=disponibilidad_promedio,
+                         rendimiento_promedio=rendimiento_promedio,
+                         calidad_promedio=calidad_promedio,
+                         oee_promedio=oee_promedio)
+
 if __name__== '__main__':
     app.run(port=int(os.environ.get("FLASK_PORT", 5000)))
