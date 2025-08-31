@@ -1,0 +1,9 @@
+{
+  "empleado_001": {
+    "id": "empleado_001",
+    "nombre": "Gonzalo Petosa",
+    "puesto": "Operario de Producción",
+    "foto_path": "petosa-gonzalo.jpg",
+    "embedding": null
+  }
+}

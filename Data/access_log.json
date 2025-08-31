@@ -46,3 +46,17 @@
 {"timestamp": "2025-08-29T21:43:52.773481", "event": "access_denied", "employees": []}
 {"timestamp": "2025-08-29T21:43:54.647103", "event": "access_denied", "employees": []}
 {"timestamp": "2025-08-29T21:43:57.159655", "event": "access_granted", "employees": [{"id": "empleado_001", "nombre": "Gonzalo Petosa", "puesto": "Operario de Producci\u00f3n", "confidence": 69.9731216430664}]}
+{"timestamp": "2025-08-31T13:21:16.998469", "event": "access_denied", "employees": []}
+{"timestamp": "2025-08-31T13:21:42.867765", "event": "access_denied", "employees": []}
+{"timestamp": "2025-08-31T13:21:46.653145", "event": "access_denied", "employees": []}
+{"timestamp": "2025-08-31T13:21:51.451550", "event": "access_granted", "employees": [{"id": "empleado_001", "nombre": "Gonzalo Petosa", "puesto": "Operario de Producci\u00f3n", "confidence": 68.63130187988281}]}
+{"timestamp": "2025-08-31T13:22:07.549923", "event": "access_granted", "employees": [{"id": "empleado_001", "nombre": "Gonzalo Petosa", "puesto": "Operario de Producci\u00f3n", "confidence": 65.63050842285156}]}
+{"timestamp": "2025-08-31T13:24:05.633993", "event": "access_granted", "employees": [{"id": "empleado_001", "nombre": "Gonzalo Petosa", "puesto": "Operario de Producci\u00f3n", "confidence": 66.54159545898438}]}
+{"timestamp": "2025-08-31T13:24:06.789332", "event": "access_granted", "employees": [{"id": "empleado_001", "nombre": "Gonzalo Petosa", "puesto": "Operario de Producci\u00f3n", "confidence": 60.55448532104492}]}
+{"timestamp": "2025-08-31T13:24:11.682445", "event": "access_granted", "employees": [{"id": "empleado_001", "nombre": "Gonzalo Petosa", "puesto": "Operario de Producci\u00f3n", "confidence": 67.44478607177734}]}
+{"timestamp": "2025-08-31T13:27:15.054711", "event": "access_granted", "employees": [{"id": "empleado_001", "nombre": "Gonzalo Petosa", "puesto": "Operario de Producci\u00f3n", "confidence": 69.83230590820312}]}
+{"timestamp": "2025-08-31T13:27:22.435385", "event": "access_granted", "employees": [{"id": "empleado_001", "nombre": "Gonzalo Petosa", "puesto": "Operario de Producci\u00f3n", "confidence": 66.831298828125}]}
+{"timestamp": "2025-08-31T13:27:27.392108", "event": "access_granted", "employees": [{"id": "empleado_001", "nombre": "Gonzalo Petosa", "puesto": "Operario de Producci\u00f3n", "confidence": 68.04393768310547}]}
+{"timestamp": "2025-08-31T13:27:46.919254", "event": "access_granted", "employees": [{"id": "empleado_001", "nombre": "Gonzalo Petosa", "puesto": "Operario de Producci\u00f3n", "confidence": 68.49333953857422}]}
+{"timestamp": "2025-08-31T13:27:49.970315", "event": "access_granted", "employees": [{"id": "empleado_001", "nombre": "Gonzalo Petosa", "puesto": "Operario de Producci\u00f3n", "confidence": 68.49333953857422}]}
+{"timestamp": "2025-08-31T13:27:52.329881", "event": "access_denied", "employees": []}

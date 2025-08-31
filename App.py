@@ -9,9 +9,17 @@ import pickle
 import json
 import insightface
 from insightface.app import FaceAnalysis
+from visualizacion import visualizacion_bp
+from decorators import facial_auth_required
 
 app = Flask(__name__)
 app.secret_key = 'tu_clave_secreta_aqui'
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_SECURE'] = False  # Cambia a True en producción con HTTPS
+app.config['PERMANENT_SESSION_LIFETIME'] = 3600  # 1 hora de sesión
+
+# Registrar el blueprint en una ruta base (ej: "/dashboard")
+app.register_blueprint(visualizacion_bp, url_prefix="/dashboard")
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 SAVE_DIR = os.path.join(BASE_DIR, "data")
@@ -25,16 +33,26 @@ face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_fronta
 app_face = FaceAnalysis(name='buffalo_l')
 app_face.prepare(ctx_id=0, det_size=(640, 640))
 
-# Base de datos de empleados
-EMPLOYEES_DB = {
-    "empleado_001": {
-        "id": "empleado_001",
-        "nombre": "Gonzalo Petosa",
-        "puesto": "Operario de Producción",
-        "foto_path": os.path.join(EMPLOYEES_DIR, "petosa.jpg"),
-        "embedding": None
-    }
-}
+EMPLOYEES_DB_FILE = os.path.join(EMPLOYEES_DIR, "employees.json")
+
+def load_employees_db():
+    """Cargar base de datos de empleados desde JSON"""
+    if os.path.exists(EMPLOYEES_DB_FILE):
+        try:
+            with open(EMPLOYEES_DB_FILE, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except json.JSONDecodeError:
+            print("Error leyendo employees.json, creando nuevo archivo")
+            return {}
+    return {}
+
+def save_employees_db(employees_db):
+    """Guardar base de datos de empleados en JSON"""
+    with open(EMPLOYEES_DB_FILE, 'w', encoding='utf-8') as f:
+        json.dump(employees_db, f, ensure_ascii=False, indent=2)
+
+# Cargar la base de datos al inicio (reemplaza la definición estática)
+EMPLOYEES_DB = load_employees_db()
 
 # Cargar embeddings de empleados
 def load_employee_embeddings():
@@ -99,16 +117,19 @@ def recognize_face(frame):
         print(f"Error en reconocimiento facial: {e}")
         return []
 
+
 @app.route('/')
 def index():
     return render_template('capturar_imagen.html')
 
 @app.route('/admin')
+@facial_auth_required
 def admin():
     """Panel de administración"""
     return render_template('admin.html', employees=EMPLOYEES_DB)
 
 @app.route('/register_employee', methods=['POST'])
+@facial_auth_required
 def register_employee():
     """Registrar nuevo empleado"""
     try:
@@ -239,7 +260,7 @@ def verify_identity():
         cap.release()
 
         if best_frame is None:
-            return jsonify({"error": "No se pudo capturar imagen"}), 400
+            return jsonify({"success": False, "message": "No se pudo capturar imagen"}), 400
 
         frame = cv2.resize(best_frame, (640, 480))
         recognized_employees = recognize_face(frame)
@@ -247,6 +268,13 @@ def verify_identity():
         if recognized_employees:
             recognized_employees.sort(key=lambda x: x['confidence'], reverse=True)
             best_match = recognized_employees[0]
+
+            # 👉 Guardar en sesión
+            session['authenticated'] = True
+            session['employee_id'] = best_match["employee"]["id"]
+            session['employee_name'] = best_match["employee"]["nombre"]
+            session['employee_role'] = best_match["employee"]["puesto"]
+            session['login_time'] = datetime.now().isoformat()
 
             return jsonify({
                 "success": True,
@@ -264,9 +292,10 @@ def verify_identity():
             }), 401
 
     except Exception as e:
-        return jsonify({"error": f"Error: {str(e)}"}), 500
+        return jsonify({"success": False, "message": f"Error: {str(e)}"}), 500
 
 @app.route("/access_logs", methods=["GET"])
+@facial_auth_required
 def get_access_logs():
     """Obtener logs de acceso"""
     try:

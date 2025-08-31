@@ -152,19 +152,31 @@
 
     // Login: captura facial
     document.getElementById("btnFaceLogin").addEventListener("click", async () => {
-      try {
-        const response = await fetch("/capture_face");
-        if (!response.ok) { alert("Error al capturar rostro"); return; }
-        const blob = await response.blob();
-        const imgUrl = URL.createObjectURL(blob);
-        const img = document.getElementById("capturedImage");
-        img.src = imgUrl;
-        img.style.display = "block";
-      } catch (err) {
-        console.error(err);
-        alert("Error al conectar con el servidor");
+    try {
+      const response = await fetch("/verify_identity", { method: "POST" });
+
+      if (response.redirected) {
+        // Si el backend hace redirect directo
+        window.location.href = response.url;
+        return;
       }
-    });
+
+      const data = await response.json();
+
+      if (data.success) {
+        alert(`✅ Acceso autorizado: ${data.employee.nombre} (${data.employee.puesto})`);
+        // Redirigir al dashboard después del mensaje
+        window.location.href = "/dashboard/oee";
+      } else {
+        alert(`❌ Acceso denegado: ${data.message || "No se reconoció al empleado"}`);
+      }
+
+    } catch (err) {
+      console.error(err);
+      alert("⚠️ Error al conectar con el servidor");
+    }
+  });
+
 
     // Registro: captura facial asociada al usuario
     document.getElementById("btnFaceRegister").addEventListener("click", async () => {

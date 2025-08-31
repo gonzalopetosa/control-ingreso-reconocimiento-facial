@@ -3,13 +3,16 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib
 matplotlib.use('Agg')  # Para evitar problemas con hilos en Flask
-from flask import Flask, render_template
+from flask import Flask, render_template, Blueprint
 import io
 import base64
 from datetime import datetime
+from decorators import facial_auth_required
 
 # --- 1. Inicialización de la Aplicación Flask ---
 app = Flask(__name__)
+
+visualizacion_bp = Blueprint("visualizacion", __name__)
 
 # --- 2. Carga de los Datasets en Memoria ---
 # Para eficiencia, cargamos los CSV una sola vez cuando la app se inicia.
@@ -54,6 +57,7 @@ for name, filename in files.items():
         print(f"❌ Error cargando '{filename}': {str(e)}")
 
 # --- 3. Procesamiento de Datos para Análisis de Desperdicios ---
+@facial_auth_required
 def procesar_datos_desperdicios():
     if 'produccion' not in dataframes:
         return None
@@ -67,7 +71,8 @@ def procesar_datos_desperdicios():
     return desperdicio_por_producto
 
 # --- 4. Rutas de la Aplicación Flask ---
-@app.route('/')
+@visualizacion_bp.route('/')
+@facial_auth_required
 def index():
     # Obtener datos OEE para mostrar en el dashboard
     df_oee = calcular_oee()
@@ -126,7 +131,8 @@ def index():
                               oee_plot_url="",
                               oee_data=[])
 
-@app.route('/desperdicios')
+@visualizacion_bp.route('/desperdicios')
+@facial_auth_required
 def mostrar_desperdicios():
     # Procesar datos de desperdicios
     datos_desperdicios = procesar_datos_desperdicios()
@@ -187,7 +193,7 @@ def mostrar_desperdicios():
                           tabla_datos=tabla_datos)
 
 
-
+@facial_auth_required
 def procesar_horas_trabajadas():
     if 'ingresos_egresos' not in dataframes:
         return None
@@ -204,7 +210,8 @@ def procesar_horas_trabajadas():
 
     return horas_por_empleado
 
-@app.route('/horarios')
+@visualizacion_bp.route('/horarios')
+@facial_auth_required
 def mostrar_horarios():
     datos_horas = procesar_horas_trabajadas()
 
@@ -238,6 +245,7 @@ def mostrar_horarios():
     return render_template('horarios.html', plot_url=plot_url, datos=datos_horas.to_dict('records'))
 
 # Función para procesar datos de stock
+@facial_auth_required
 def procesar_datos_stock():
     if 'stock' not in dataframes:
         return None, None, None, None
@@ -253,6 +261,7 @@ def procesar_datos_stock():
     df['dias_hasta_vencer'] = (df['fecha_vencimiento'] - hoy).dt.days
 
     # Categorizar productos por proximidad al vencimiento
+    @facial_auth_required
     def categorizar_vencimiento(dias):
         if dias < 0:
             return 'Vencido'
@@ -285,7 +294,8 @@ def procesar_datos_stock():
     return stock_por_producto, productos_proximos_vencer, stock_por_proveedor, df
 
 # Ruta para el control de inventario
-@app.route('/inventario')
+@visualizacion_bp.route('/inventario')
+@facial_auth_required
 def mostrar_inventario():
     stock_producto, productos_proximos, stock_proveedor, df_stock = procesar_datos_stock()
 
@@ -370,7 +380,7 @@ def mostrar_inventario():
                           total_stock=total_stock,
                           productos_vencidos=productos_vencidos,
                           productos_por_vencer=productos_por_vencer)
-
+@facial_auth_required
 def calcular_oee():
     try:
         # Cargar datasets ampliados
@@ -399,7 +409,8 @@ def calcular_oee():
         print(f"Error al calcular OEE: {e}")
         return None
 
-@app.route("/oee")
+@visualizacion_bp.route("/oee")
+@facial_auth_required
 def mostrar_oee():
     df = calcular_oee()
     if df is None:

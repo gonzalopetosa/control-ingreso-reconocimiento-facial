@@ -39,7 +39,7 @@
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container">
-            <a class="navbar-brand" href="/">
+            <a class="navbar-brand" href="{{ url_for('visualizacion.index') }}">
                 <i class="bi bi-shop"></i> PyME Alimenticia
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -47,32 +47,37 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
-    			<li class="nav-item">
-        			<a class="nav-link" href="/">
-            			<i class="bi bi-house"></i> Inicio
-        			</a>
-    			</li>
-    			<li class="nav-item">
-        			<a class="nav-link" href="/desperdicios">
-            			<i class="bi bi-bar-chart"></i> Desperdicios
-        			</a>
-    				</li>
-    			<li class="nav-item">
-        			<a class="nav-link" href="/horarios">
-            			<i class="bi bi-clock"></i> Horarios
-        			</a>
-    			</li>
-    			<li class="nav-item">
-        			<a class="nav-link" href="/accesos">
-            			<i class="bi bi-shield-check"></i> Control Accesos
-        			</a>
-    			</li>
-    			<li class="nav-item">
-        			<a class="nav-link" href="/inventario">
-            			<i class="bi bi-boxes"></i> Inventario
-        			</a>
-    			</li>
-		</ul>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('visualizacion.index') }}">
+                            <i class="bi bi-house"></i> Inicio
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('visualizacion.mostrar_desperdicios') }}">
+                            <i class="bi bi-bar-chart"></i> Desperdicios
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('visualizacion.mostrar_horarios') }}">
+                            <i class="bi bi-clock"></i> Horarios
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin">
+                            <i class="bi bi-shield-check"></i> Control Accesos
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('visualizacion.mostrar_inventario') }}">
+                            <i class="bi bi-boxes"></i> Inventario
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('visualizacion.mostrar_oee') }}">
+                            <i class="bi bi-speedometer2"></i> OEE
+                        </a>
+                    </li>
+                </ul>
             </div>
         </div>
     </nav>
