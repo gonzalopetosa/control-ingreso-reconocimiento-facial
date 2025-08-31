@@ -3,13 +3,16 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib
 matplotlib.use('Agg')  # Para evitar problemas con hilos en Flask
-from flask import Flask, render_template
+from flask import Flask, render_template, Blueprint
 import io
 import base64
 from datetime import datetime
+from decorators import facial_auth_required
 
 # --- 1. Inicialización de la Aplicación Flask ---
 app = Flask(__name__)
+
+visualizacion_bp = Blueprint("visualizacion", __name__)
 
 # --- 2. Carga de los Datasets en Memoria ---
 # Para eficiencia, cargamos los CSV una sola vez cuando la app se inicia.
@@ -67,7 +70,8 @@ def procesar_datos_desperdicios():
     return desperdicio_por_producto
 
 # --- 4. Rutas de la Aplicación Flask ---
-@app.route('/')
+@visualizacion_bp.route('/')
+@facial_auth_required
 def index():
     # Obtener datos OEE para mostrar en el dashboard
     df_oee = calcular_oee()
@@ -108,7 +112,8 @@ def index():
                               oee_plot_url="",
                               oee_data=[])
 
-@app.route('/desperdicios')
+@visualizacion_bp.route('/desperdicios')
+@facial_auth_required
 def mostrar_desperdicios():
     # Procesar datos de desperdicios
     datos_desperdicios = procesar_datos_desperdicios()
@@ -186,7 +191,8 @@ def procesar_horas_trabajadas():
 
     return horas_por_empleado
 
-@app.route('/horarios')
+@visualizacion_bp.route('/horarios')
+@facial_auth_required
 def mostrar_horarios():
     datos_horas = procesar_horas_trabajadas()
 
@@ -267,7 +273,8 @@ def procesar_datos_stock():
     return stock_por_producto, productos_proximos_vencer, stock_por_proveedor, df
 
 # Ruta para el control de inventario
-@app.route('/inventario')
+@visualizacion_bp.route('/inventario')
+@facial_auth_required
 def mostrar_inventario():
     stock_producto, productos_proximos, stock_proveedor, df_stock = procesar_datos_stock()
 
@@ -369,12 +376,17 @@ def calcular_oee():
         df["Calidad"] = (df["unidades_totales"] - df["unidades_defectuosas"]) / df["unidades_totales"]
         df["OEE"] = df["Disponibilidad"] * df["Rendimiento"] * df["Calidad"]
 
+        # Añadir campo velocidad_real_upm si no existe (para evitar error en template)
+        if 'velocidad_real_upm' not in df.columns:
+            df['velocidad_real_upm'] = df['unidades_producidas'] / (df['tiempo_operativo_min'] / 60)
+
         return df
     except Exception as e:
         print(f"Error al calcular OEE: {e}")
         return None
 
-@app.route("/oee")
+@visualizacion_bp.route("/oee")
+@facial_auth_required
 def mostrar_oee():
     df = calcular_oee()
     if df is None:

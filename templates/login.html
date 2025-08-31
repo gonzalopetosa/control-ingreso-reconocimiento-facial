@@ -215,14 +215,28 @@
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ image: imageData })
             })
-            .then(res => res.text())
-            .then(data => {
-              alert(data);
+            .then(res => {
+              if (res.redirected) {
+                // Si el servidor redirige, seguir la redirección
+                window.location.href = res.url;
+              } else {
+                return res.json().then(data => {
+                  if (data.success) {
+                    // Login exitoso - redirigir al dashboard
+                    window.location.href = '/visualizacion/oee';
+                  } else {
+                    // Mostrar mensaje de error
+                    alert(data.message || 'Error en el reconocimiento facial');
+                  }
+                });
+              }
+            })
+            .catch(err => console.error(err))
+            .finally(() => {
               // Detener la cámara y ocultar el video
               stream.getTracks().forEach(track => track.stop());
               video.style.display = "none";
-            })
-            .catch(err => console.error(err));
+            });
           }, 1500);
           video.style.display = "block"; // Mostrar el video solo cuando se usa
         })
