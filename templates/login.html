@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>PyME Alimenticia - Login</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      background: #23232b;
+      font-family: 'Arial', sans-serif;
+      position: relative;
+      overflow: hidden;
+    }
+    .circle {
+      position: absolute;
+      border-radius: 50%;
+      background: #3d3df7;
+      left: -150px;
+      top: 50px;
+      width: 500px;
+      height: 500px;
+      z-index: 0;
+    }
+    .small-circle {
+      position: absolute;
+      border-radius: 50%;
+      background: #7ed6fc;
+      left: 70px;
+      top: 70px;
+      width: 60px;
+      height: 60px;
+      z-index: 1;
+    }
+    .stripes {
+      position: absolute;
+      right: 0;
+      top: 0;
+      z-index: 0;
+    }
+    .login-container {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+    .login-box {
+      background: #2c2c36;
+      padding: 40px 50px;
+      border-radius: 20px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+      text-align: center;
+      min-width: 350px;
+    }
+    .login-box h1 {
+      color: #fff;
+      font-size: 2.5em;
+      margin-bottom: 0;
+      font-family: 'Georgia', serif;
+    }
+    .login-box h2 {
+      color: #bdbdbd;
+      font-size: 1.2em;
+      margin-top: 0;
+      margin-bottom: 30px;
+      font-weight: normal;
+    }
+    .login-box input {
+      display: block;
+      width: 100%;
+      margin: 15px 0;
+      padding: 12px;
+      border: none;
+      border-bottom: 2px solid #3d3df7;
+      background: transparent;
+      color: #fff;
+      font-size: 1em;
+      outline: none;
+    }
+    .login-box input::placeholder {
+      color: #bdbdbd;
+    }
+    .login-box .links {
+      text-align: left;
+      font-size: 0.95em;
+      margin-bottom: 20px;
+      color: #bdbdbd;
+    }
+    .login-box .links a {
+      color: #a259f7;
+      text-decoration: none;
+    }
+    .login-box .links a:hover {
+      text-decoration: underline;
+    }
+    .login-box .login-btn {
+      width: 100%;
+      padding: 12px 0;
+      background: #3d3df7;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.1em;
+      cursor: pointer;
+      margin-bottom: 20px;
+      transition: background 0.2s;
+    }
+    .login-box .login-btn:hover {
+      background: #2323b7;
+    }
+    .face-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 10px auto;
+      cursor: pointer;
+      background: none;
+      border: none;
+      outline: none;
+    }
+    .face-icon {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      border: 5px solid #fff;
+      background: #23232b;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+    .face-btn:hover .face-icon {
+      transform: scale(1.07);
+      border-color: #3d3df7;
+    }
+    .face-svg {
+      width: 60px;
+      height: 60px;
+      display: block;
+    }
+    .login-box .face-label {
+      color: #bdbdbd;
+      font-size: 1em;
+      margin-bottom: 10px;
+    }
+    video, canvas { display: none; }
+  </style>
+</head>
+<body>
+  <div class="circle"></div>
+  <div class="small-circle"></div>
+  <div class="stripes">
+    <svg width="300" height="150">
+      <rect x="220" y="0" width="80" height="150" fill="#3d3df7" />
+      <rect x="170" y="0" width="30" height="150" fill="#3d3df7" />
+      <rect x="120" y="0" width="30" height="150" fill="#3d3df7" />
+      <rect x="70" y="0" width="30" height="150" fill="#3d3df7" />
+      <rect x="20" y="0" width="30" height="150" fill="#3d3df7" />
+    </svg>
+  </div>
+  <div class="login-container">
+    <div class="login-box">
+      <h1>PyME <span style="font-size:0.7em; color:#bdbdbd;">Alimenticia</span></h1>
+      <form method="POST" action="/login">
+        <input type="text" name="username" placeholder="Usuario" required>
+        <input type="password" name="password" placeholder="Contraseña" required>
+        <div class="links">
+          ¿Olvidaste tu contraseña? Hacé click <a href="#">acá</a>.<br>
+          ¿Nuevo? Registrate <a href="/register">acá</a>.
+        </div>
+        <button type="submit" class="login-btn">Login</button>
+      </form>
+      {% if error %}
+        <div style="color:#a259f7; margin-top:10px;">{{ error }}</div>
+      {% endif %}
+      {% if success %}
+        <div style="color:#3d3df7; margin-top:10px;">{{ success }}</div>
+      {% endif %}
+      <div class="face-label">O con reconocimiento facial:</div>
+      <button class="face-btn" onclick="captureFace()">
+        <div class="face-icon">
+          <!-- SVG de cara estilo minimalista -->
+          <svg class="face-svg" viewBox="0 0 60 60">
+            <circle cx="30" cy="30" r="28" stroke="#fff" stroke-width="2" fill="none"/>
+            <circle cx="20" cy="25" r="4" fill="#fff"/>
+            <circle cx="40" cy="25" r="4" fill="#fff"/>
+            <!-- Nariz tipo línea -->
+            <line x1="30" y1="36" x2="30" y2="40" stroke="#fff" stroke-width="2"/>
+            <path d="M20 40 Q30 50 40 40" stroke="#fff" stroke-width="2" fill="none"/>
+          </svg>
+        </div>
+      </button>
+      <video id="video" width="320" height="240" autoplay></video>
+      <canvas id="canvas" width="320" height="240" style="display:none;"></canvas>
+    </div>
+  </div>
+  <script>
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const context = canvas.getContext('2d');
+
+    function captureFace() {
+      navigator.mediaDevices.getUserMedia({ video: true })
+        .then(stream => {
+          video.srcObject = stream;
+          setTimeout(() => {
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const imageData = canvas.toDataURL('image/png');
+            fetch('/login_face', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ image: imageData })
+            })
+            .then(res => res.text())
+            .then(data => {
+              alert(data);
+              // Detener la cámara y ocultar el video
+              stream.getTracks().forEach(track => track.stop());
+              video.style.display = "none";
+            })
+            .catch(err => console.error(err));
+          }, 1500);
+          video.style.display = "block"; // Mostrar el video solo cuando se usa
+        })
+        .catch(err => alert("No se pudo acceder a la cámara"));
+    }
+  </script>
+</body>
+</html>
