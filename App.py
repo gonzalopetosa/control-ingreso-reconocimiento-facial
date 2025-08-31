@@ -8,9 +8,16 @@ from datetime import datetime
 import face_recognition
 import sqlite3
 from flask import redirect, url_for
+from decorators import facial_auth_required
+from visualizacion import visualizacion_bp
+
+
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"  # necesario para sesiones
+
+# Registrar el blueprint en una ruta base (ej: "/dashboard")
+app.register_blueprint(visualizacion_bp, url_prefix="/visualizacion")
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 SAVE_DIR = os.path.join(BASE_DIR, "data")
@@ -56,25 +63,44 @@ def login_face():
     # Buscar rostros en la imagen recibida
     face_encodings = face_recognition.face_encodings(frame)
     if not face_encodings:
-        return "❌ No se detectó rostro en la imagen"
+        return jsonify({
+            "success": False,
+            "message": "❌ No se detectó rostro en la imagen"
+        })
 
     # Buscar en todos los usuarios registrados
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute("SELECT username, rostro_path FROM usuarios WHERE rostro_path IS NOT NULL")
     rostros = c.fetchall()
+
+    usuario_identificado = None
     for username, rostro_filename in rostros:
         path = os.path.join(ROSTROS_DIR, rostro_filename)
         if os.path.exists(path):
             known_image = face_recognition.load_image_file(path)
             known_encodings = face_recognition.face_encodings(known_image)
             if known_encodings and face_recognition.compare_faces([known_encodings[0]], face_encodings[0])[0]:
-                session["user"] = username     
-                conn.close()
-                return redirect(url_for("dashboard")) and f"✅ Bienvenido {username} (login con rostro)"
-            
+                usuario_identificado = username
+                break
+
     conn.close()
-    return "❌ Rostro no coincide"
+
+    if usuario_identificado:
+        session["user"] = usuario_identificado
+        session["authenticated"] = True  # Asegurar que la sesión esté autenticada
+
+        # ✅ Devolver JSON con éxito - el frontend se encargará de redirigir
+        return jsonify({
+            "success": True,
+            "message": f"✅ Bienvenido {usuario_identificado}",
+            "username": usuario_identificado
+        })
+
+    return jsonify({
+        "success": False,
+        "message": "❌ Rostro no coincide con ningún usuario registrado"
+    })
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
@@ -202,4 +228,4 @@ def init_db():
 init_db()
 
 if __name__ == "__main__":
-    app.run(port=int(os.environ.get("FLASK_PORT", 5000)), debug=True)
+     app.run(port=int(os.environ.get("FLASK_PORT", 5000)))
