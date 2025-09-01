@@ -1,6 +1,16 @@
-fecha,turno,tiempo_planificado_min,tiempo_operativo_min,tiempo_parada_min
-01/08/2025,Mañana,480,450,30
-02/08/2025,Tarde,480,400,80
-03/08/2025,Noche,480,470,10
-04/08/2025,Mañana,480,420,60
-05/08/2025,Tarde,480,460,20
+fecha,turno,tiempo_planificado_min,tiempo_operativo_min,tiempo_parada_min,causa_parada
+01/08/2025,Mañana,480,450,30,"Problema empaque"
+01/08/2025,Tarde,480,400,80,"Falla eléctrica"
+01/08/2025,Noche,480,470,10,"Problema empaque"
+02/08/2025,Mañana,480,420,60,"Limpieza profunda"
+02/08/2025,Tarde,480,460,20,"Cambio de ingredientes"
+02/08/2025,Noche,480,475,5,"Ajuste rápido"
+03/08/2025,Mañana,480,440,40,"Problema empaque"
+03/08/2025,Tarde,480,390,90,"Mantenimiento preventivo"
+03/08/2025,Noche,480,465,15,"Espera material"
+04/08/2025,Mañana,480,430,50,"Cambio de ingredientes"
+04/08/2025,Tarde,480,455,25,"Ajuste temperatura"
+04/08/2025,Noche,480,468,12,"Revisión calidad"
+05/08/2025,Mañana,480,425,55,"Problema mezcladora"
+05/08/2025,Tarde,480,445,35,"Cambio de molde"
+05/08/2025,Noche,480,472,8,"Cambio de ingredientes"

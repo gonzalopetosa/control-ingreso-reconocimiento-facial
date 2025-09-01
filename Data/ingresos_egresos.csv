@@ -24,3 +24,4 @@ id_registro,id_empleado,nombre,apellido,fecha,hora_ingreso,hora_egreso,area
 23,7,gonza,,31/08/2025,19:47,19:48,Sistema
 24,7,gonza,,31/08/2025,19:50,,Sistema
 25,8,io,,01/09/2025,18:29,18:30,Sistema
+26,8,io,,01/09/2025,18:34,18:40,Sistema
