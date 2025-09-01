@@ -22,3 +22,5 @@ id_registro,id_empleado,nombre,apellido,fecha,hora_ingreso,hora_egreso,area
 21,109,Gonzalo,Petosa,21/08/2025,00:00,20:00,Administración
 22,7,gonza,,31/08/2025,19:46,19:46,Sistema
 23,7,gonza,,31/08/2025,19:47,19:48,Sistema
+24,7,gonza,,31/08/2025,19:50,,Sistema
+25,8,io,,01/09/2025,18:29,18:30,Sistema
