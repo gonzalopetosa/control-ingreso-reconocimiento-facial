@@ -120,7 +120,7 @@ def registrar_ingreso_automatico(username):
         user_id, username = usuario
 
         # Leer el archivo CSV existente
-        csv_path = os.path.join(BASE_DIR, "ingresos_egresos.csv")
+        csv_path = os.path.join(SAVE_DIR, "ingresos_egresos.csv")
         registros = []
         fieldnames = ['id_registro', 'id_empleado', 'nombre', 'apellido',
                      'fecha', 'hora_ingreso', 'hora_egreso', 'area']
@@ -195,7 +195,7 @@ def registrar_egreso_automatico(username):
     hora_actual = ahora.strftime("%H:%M")
 
     # Leer el archivo CSV
-    csv_path = os.path.join(BASE_DIR, "ingresos_egresos.csv")
+    csv_path = os.path.join(SAVE_DIR, "ingresos_egresos.csv")
     fieldnames = ['id_registro', 'id_empleado', 'nombre', 'apellido',
                  'fecha', 'hora_ingreso', 'hora_egreso', 'area']
 
