@@ -55,7 +55,12 @@ def index():
 def login():
     username = request.form["username"]
     password = request.form["password"]
-    error = None
+
+    # Si hay un rostro detectado, debe coincidir con este usuario
+    pending_user = session.get("pending_face_user")
+    if pending_user and username != pending_user:
+        error = "❌ El usuario no coincide con el rostro detectado"
+        return render_template("login.html", error=error)
 
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
@@ -65,6 +70,7 @@ def login():
 
     if user:
         session["user"] = username
+        session.pop("pending_face_user", None)  # limpiar la variable temporal
         return redirect(url_for("dashboard"))
     else:
         error = "❌ Usuario o contraseña incorrectos"
@@ -77,31 +83,21 @@ def login_face():
     image_data = re.sub('^data:image/.+;base64,', '', data['image'])
     image_bytes = base64.b64decode(image_data)
 
-    # Convertir a imagen OpenCV
     np_arr = np.frombuffer(image_bytes, np.uint8)
     frame = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
 
-    # Buscar rostros en la imagen recibida
     face_encodings = face_recognition.face_encodings(frame)
     if not face_encodings:
-        return jsonify({
-            "success": False,
-            "message": "❌ No se detectó rostro en la imagen"
-        })
+        return jsonify({"success": False, "message": "❌ No se detectó rostro en la imagen"})
 
-    # Buscar en todos los usuarios registrados
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute("SELECT username, rostro_path, role FROM usuarios WHERE rostro_path IS NOT NULL")
     rostros = c.fetchall()
     conn.close()
 
-    print("DEBUG -> filas recibidas de la DB:", rostros)  # 👈 para depuración
-
     usuario_identificado = None
-    rol_identificado = None
 
-    # 👇 recorremos correctamente las 3 columnas
     for username, rostro_filename, role in rostros:
         path = os.path.join(ROSTROS_DIR, rostro_filename)
         if os.path.exists(path):
@@ -109,26 +105,18 @@ def login_face():
             known_encodings = face_recognition.face_encodings(known_image)
             if known_encodings and face_recognition.compare_faces([known_encodings[0]], face_encodings[0])[0]:
                 usuario_identificado = username
-                rol_identificado = role
                 break
 
     if usuario_identificado:
-        session["user"] = usuario_identificado
-        session["role"] = rol_identificado   # ✅ ahora guarda el rol
-        session["authenticated"] = True
-        registrar_ingreso_automatico(usuario_identificado)
-
+        # Guardar en sesión el usuario detectado, pero sin loguear todavía
+        session["pending_face_user"] = usuario_identificado
         return jsonify({
             "success": True,
-            "message": f"✅ Bienvenido {usuario_identificado}",
-            "username": usuario_identificado,
-            "role": rol_identificado
+            "message": f"✅ Rostro identificado como {usuario_identificado}. Ahora ingrese usuario y contraseña.",
+            "username": usuario_identificado
         })
 
-    return jsonify({
-        "success": False,
-        "message": "❌ Rostro no coincide con ningún usuario registrado"
-    })
+    return jsonify({"success": False, "message": "❌ Rostro no coincide con ningún usuario registrado"})
 
 # Función para registrar ingreso automático
 def registrar_ingreso_automatico(username):
