@@ -8,7 +8,7 @@ from datetime import datetime
 import face_recognition
 import sqlite3
 from flask import redirect, url_for
-from decorators import facial_auth_required
+from decorators import facial_auth_required, role_required
 from visualizacion import visualizacion_bp
 import csv
 
@@ -23,6 +23,27 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 SAVE_DIR = os.path.join(BASE_DIR, "data")
 ROSTROS_DIR = os.path.join(BASE_DIR, "rostros")
 os.makedirs(SAVE_DIR, exist_ok=True)
+
+
+DB_PATH = os.path.join(BASE_DIR, "data", "usuarios.db")
+
+def init_db():
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("""
+    CREATE TABLE IF NOT EXISTS usuarios (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT UNIQUE NOT NULL,
+        password TEXT NOT NULL,
+        email TEXT NOT NULL,
+        rostro_path TEXT,
+        role TEXT NOT NULL DEFAULT 'operador'
+    )
+""")
+    conn.commit()
+    conn.close()
+
+init_db()
 
 # ====== RUTA PRINCIPAL ======
 @app.route("/")
@@ -71,31 +92,37 @@ def login_face():
     # Buscar en todos los usuarios registrados
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
-    c.execute("SELECT username, rostro_path FROM usuarios WHERE rostro_path IS NOT NULL")
+    c.execute("SELECT username, rostro_path, role FROM usuarios WHERE rostro_path IS NOT NULL")
     rostros = c.fetchall()
+    conn.close()
+
+    print("DEBUG -> filas recibidas de la DB:", rostros)  # 👈 para depuración
 
     usuario_identificado = None
-    for username, rostro_filename in rostros:
+    rol_identificado = None
+
+    # 👇 recorremos correctamente las 3 columnas
+    for username, rostro_filename, role in rostros:
         path = os.path.join(ROSTROS_DIR, rostro_filename)
         if os.path.exists(path):
             known_image = face_recognition.load_image_file(path)
             known_encodings = face_recognition.face_encodings(known_image)
             if known_encodings and face_recognition.compare_faces([known_encodings[0]], face_encodings[0])[0]:
                 usuario_identificado = username
+                rol_identificado = role
                 break
-
-    conn.close()
 
     if usuario_identificado:
         session["user"] = usuario_identificado
+        session["role"] = rol_identificado   # ✅ ahora guarda el rol
         session["authenticated"] = True
-        # Registrar ingreso automáticamente
         registrar_ingreso_automatico(usuario_identificado)
 
         return jsonify({
             "success": True,
             "message": f"✅ Bienvenido {usuario_identificado}",
-            "username": usuario_identificado
+            "username": usuario_identificado,
+            "role": rol_identificado
         })
 
     return jsonify({
@@ -276,6 +303,7 @@ def register():
         password = request.form["password"]
         confirm_password = request.form["confirm_password"]
         email = request.form["email"]
+        role = request.form.get("role", "operador")  # 👈 por defecto operador
 
         if password != confirm_password:
             error = "❌ Las contraseñas no coinciden"
@@ -284,8 +312,8 @@ def register():
         conn = sqlite3.connect(DB_PATH)
         c = conn.cursor()
         try:
-            c.execute("INSERT INTO usuarios (username, password, email) VALUES (?, ?, ?)",
-                      (username, password, email))
+            c.execute("INSERT INTO usuarios (username, password, email, role) VALUES (?, ?, ?, ?)",
+                      (username, password, email, role))
             conn.commit()
         except sqlite3.IntegrityError:
             conn.close()
@@ -368,28 +396,11 @@ def register_face_reject():
     return render_template("register.html", error=error)
 
 @app.route("/dashboard")
+@facial_auth_required
 def dashboard():
     username = session.get("user", "Usuario")
     return render_template("dashboard.html", username=username)
 
-DB_PATH = os.path.join(BASE_DIR, "data", "usuarios.db")
-
-def init_db():
-    conn = sqlite3.connect(DB_PATH)
-    c = conn.cursor()
-    c.execute("""
-        CREATE TABLE IF NOT EXISTS usuarios (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            username TEXT UNIQUE NOT NULL,
-            password TEXT NOT NULL,
-            email TEXT NOT NULL,
-            rostro_path TEXT
-        )
-    """)
-    conn.commit()
-    conn.close()
-
-init_db()
 
 if __name__ == "__main__":
      app.run(port=int(os.environ.get("FLASK_PORT", 5000)))

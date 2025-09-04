@@ -177,6 +177,12 @@
         <input type="password" name="password" placeholder="Contraseña" required>
         <input type="password" name="confirm_password" placeholder="Confirmar contraseña" required>
         <input type="email" name="email" placeholder="Email" required>
+	
+  	<select name="role" required style="display:block;width:100%;margin:15px 0;padding:12px;border:none;border-bottom:2px solid #3d3df7;background:transparent;color:#fff;font-size:1em;">
+    		<option value="operador" selected>Operador</option>
+    		<option value="ADMIN">ADMIN</option>
+  	</select>
+
         <button type="submit" class="register-btn">Registrarse</button>
         {% if error %}
           <div style="color:#a259f7; margin-top:10px;">{{ error }}</div>

@@ -7,7 +7,7 @@ from flask import Flask, render_template, Blueprint
 import io
 import base64
 from datetime import datetime
-from decorators import facial_auth_required
+from decorators import facial_auth_required, role_required
 
 # --- 1. Inicialización de la Aplicación Flask ---
 app = Flask(__name__)
@@ -72,6 +72,7 @@ def procesar_datos_desperdicios():
 # --- 4. Rutas de la Aplicación Flask ---
 @visualizacion_bp.route('/')
 @facial_auth_required
+@role_required("ADMIN")
 def index():
     # Obtener datos OEE para mostrar en el dashboard
     df_oee = calcular_oee()
@@ -114,6 +115,7 @@ def index():
 
 @visualizacion_bp.route('/desperdicios')
 @facial_auth_required
+@role_required("ADMIN")
 def mostrar_desperdicios():
     # Procesar datos de desperdicios
     datos_desperdicios = procesar_datos_desperdicios()
@@ -193,6 +195,7 @@ def procesar_horas_trabajadas():
 
 @visualizacion_bp.route('/horarios')
 @facial_auth_required
+@role_required("ADMIN")
 def mostrar_horarios():
     datos_horas = procesar_horas_trabajadas()
 
@@ -387,6 +390,7 @@ def calcular_oee():
 
 @visualizacion_bp.route("/oee")
 @facial_auth_required
+@role_required("ADMIN")
 def mostrar_oee():
     df = calcular_oee()
     if df is None:
