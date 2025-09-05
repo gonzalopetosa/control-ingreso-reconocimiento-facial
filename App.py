@@ -70,7 +70,13 @@ def login():
 
     if user:
         session["user"] = username
-        session.pop("pending_face_user", None)  # limpiar la variable temporal
+        session["role"] = user[5]  # El Rol es la 6ta columna en nuestra tabla SQL *
+    
+        # Si venía de login facial, marcar autenticación completa
+        if session.get("pending_face_user"):
+            session["authenticated"] = True
+            session.pop("pending_face_user", None)
+    
         return redirect(url_for("dashboard"))
     else:
         error = "❌ Usuario o contraseña incorrectos"
@@ -112,7 +118,7 @@ def login_face():
         session["pending_face_user"] = usuario_identificado
         return jsonify({
             "success": True,
-            "message": f"✅ Rostro identificado como {usuario_identificado}. Ahora ingrese usuario y contraseña.",
+            "message": f"✅ Rostro identificado. Por favor, ingrese su usuario y contraseña.",
             "username": usuario_identificado
         })
 
@@ -339,19 +345,27 @@ def register_face():
     c = conn.cursor()
     c.execute("SELECT username, rostro_path FROM usuarios WHERE rostro_path IS NOT NULL")
     rostros = c.fetchall()
+
+    # Definir un umbral de similitud
+    umbral = 0.5  # Ajustable entre 0.4 y 0.6 según necesidad
+
     for user, path in rostros:
-        if os.path.exists(path):
-            known_image = face_recognition.load_image_file(path)
+        full_path = os.path.join(ROSTROS_DIR, path)
+        if os.path.exists(full_path):
+            known_image = face_recognition.load_image_file(full_path)
             known_encodings = face_recognition.face_encodings(known_image)
-            if known_encodings and face_recognition.compare_faces([known_encodings[0]], new_encoding)[0]:
-                # Eliminar usuario temporal
-                c2 = sqlite3.connect(DB_PATH)
-                c2.execute("DELETE FROM usuarios WHERE username=?", (username,))
-                c2.commit()
-                c2.close()
-                session.pop("user", None)
-                conn.close()
-                return jsonify({"error": "❌ No se pudo registrar el usuario porque el rostro ya está registrado"}), 400
+            if known_encodings:
+                distance = face_recognition.face_distance([known_encodings[0]], new_encoding)[0]
+                if distance < umbral:
+                    # ❌ Eliminar usuario temporal porque el rostro ya existe
+                    conn2 = sqlite3.connect(DB_PATH)
+                    c2 = conn2.cursor()
+                    c2.execute("DELETE FROM usuarios WHERE username=?", (username,))
+                    conn2.commit()
+                    conn2.close()
+                    session.pop("user", None)
+                    conn.close()
+                    return jsonify({"error": "❌ El rostro ya está registrado en el sistema"}), 400
 
     # Guardar imagen en disco
     rostro_filename = f"{username}_{datetime.now().strftime('%Y%m%d%H%M%S')}.png"
@@ -359,7 +373,7 @@ def register_face():
     with open(rostro_path, "wb") as f:
         f.write(image_bytes)
 
-    # Guarda solo el nombre en la base de datos
+    # Guardar ruta en la base de datos
     c.execute("UPDATE usuarios SET rostro_path=? WHERE username=?", (rostro_filename, username))
     conn.commit()
     conn.close()
@@ -387,7 +401,13 @@ def register_face_reject():
 @facial_auth_required
 def dashboard():
     username = session.get("user", "Usuario")
-    return render_template("dashboard.html", username=username)
+    role = session.get("role", "operador")  # valor por defecto
+
+    if role == "ADMIN":
+        return render_template("dashboard_admin.html", username=username)
+    else:
+        return render_template("dashboard_operador.html", username=username)
+
 
 
 if __name__ == "__main__":

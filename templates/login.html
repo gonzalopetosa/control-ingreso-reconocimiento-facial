@@ -44,37 +44,37 @@
       <h1>PyME <span style="font-size:0.7em; color:#bdbdbd;">Alimenticia</span></h1>
 
       <!-- Fase 1: solo botón facial -->
-      <div id="face-login">
-        <p style="color:#bdbdbd; margin-bottom:15px;">
-          Por favor, identificate con tu rostro, luego se te pedirá tu usuario y contraseña.
-        </p>
-        <div class="face-label">Login con reconocimiento facial:</div>
-        <button class="face-btn" onclick="captureFace()">
-          <div class="face-icon">
-            <svg class="face-svg" viewBox="0 0 60 60">
-              <circle cx="30" cy="30" r="28" stroke="#fff" stroke-width="2" fill="none"/>
-              <circle cx="20" cy="25" r="4" fill="#fff"/>
-              <circle cx="40" cy="25" r="4" fill="#fff"/>
-              <line x1="30" y1="36" x2="30" y2="40" stroke="#fff" stroke-width="2"/>
-              <path d="M20 40 Q30 50 40 40" stroke="#fff" stroke-width="2" fill="none"/>
-            </svg>
-          </div>
-        </button>
+      <div id="face-login" style="display:block;">
+          <p style="color:#bdbdbd; margin-bottom:15px;">
+              Por favor, identificate con tu rostro, luego se te pedirá tu usuario y contraseña.
+          </p>
+          <div class="face-label">Login con reconocimiento facial:</div>
+          <button class="face-btn" onclick="captureFace()">
+              <div class="face-icon">
+                  <svg class="face-svg" viewBox="0 0 60 60">
+                      <circle cx="30" cy="30" r="28" stroke="#fff" stroke-width="2" fill="none"/>
+                      <circle cx="20" cy="25" r="4" fill="#fff"/>
+                      <circle cx="40" cy="25" r="4" fill="#fff"/>
+                      <line x1="30" y1="36" x2="30" y2="40" stroke="#fff" stroke-width="2"/>
+                      <path d="M20 40 Q30 50 40 40" stroke="#fff" stroke-width="2" fill="none"/>
+                  </svg>
+              </div>
+          </button>
       </div>
 
       <!-- Fase 2: formulario aparece tras reconocimiento -->
       <div id="login-form" style="display:none;">
-        <h2 id="welcome-msg"></h2>
-        <form method="POST" action="/login">
-          <input type="text" name="username" placeholder="Usuario" required>
-          <input type="password" name="password" placeholder="Contraseña" required>
-          <div class="links">
-            ¿Olvidaste tu contraseña? Hacé click <a href="#">acá</a>.<br>
-            ¿Nuevo? Registrate <a href="/register">acá</a>.
-          </div>
-          <button type="submit" class="login-btn">Login</button>
-        </form>
+          <h2 id="welcome-msg"></h2>
+          <form method="POST" action="/login">
+              <input type="text" name="username" placeholder="Usuario" required>
+              <input type="password" name="password" placeholder="Contraseña" required>
+              <div class="links">
+                  ¿Olvidaste tu contraseña? Hacé click <a href="#">acá</a>.<br>
+              </div>
+              <button type="submit" class="login-btn">Login</button>
+          </form>
       </div>
+
 
       {% if error %}
         <div style="color:#a259f7; margin-top:10px;">{{ error }}</div>
@@ -83,8 +83,9 @@
         <div style="color:#3d3df7; margin-top:10px;">{{ success }}</div>
       {% endif %}
       
-      <video id="video" width="320" height="240" autoplay></video>
+      <video id="video" width="320" height="240" autoplay style="display:none; margin: 15px auto; border-radius: 10px; border: 2px solid #3d3df7;"></video>
       <canvas id="canvas" width="320" height="240" style="display:none;"></canvas>
+
     </div>
   </div>
   <script>
@@ -106,10 +107,14 @@
             })
             .then(res => res.json())
             .then(data => {
-              // Eliminar mensaje previo si existe
-              const oldMsg = document.getElementById("login-msg");
-              if (oldMsg) oldMsg.remove();
+              // 🔹 1. Borrar mensajes previos del frontend (facial recognition)
+              document.querySelectorAll("#login-msg").forEach(el => el.remove());
 
+              // 🔹 2. Borrar mensajes previos del backend (usuario/contraseña incorrectos)
+              const backendError = document.querySelector(".login-box div[style*='color:#a259f7']");
+              if (backendError) backendError.remove();
+
+              // Crear contenedor nuevo
               const msgBox = document.createElement("div");
               msgBox.id = "login-msg";
               msgBox.style.marginTop = "10px";
@@ -117,7 +122,8 @@
               if (data.success) {
                 document.getElementById("face-login").style.display = "none";
                 document.getElementById("login-form").style.display = "block";
-                document.getElementById("welcome-msg").innerText = "¡Bienvenido! Por favor ingresá tu usuario y contraseña.";
+                document.getElementById("welcome-msg").innerText =
+                  "¡Bienvenido! Por favor ingresá tu usuario y contraseña.";
                 msgBox.style.color = "#3d3df7";
                 msgBox.innerText = data.message;
               } else {
@@ -127,6 +133,7 @@
 
               document.querySelector(".login-box").appendChild(msgBox);
             })
+
             .catch(err => console.error(err))
             .finally(() => {
               stream.getTracks().forEach(track => track.stop());
