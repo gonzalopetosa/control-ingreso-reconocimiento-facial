@@ -18,10 +18,10 @@ def insert_usuario():
 
 
     # Datos del usuario a insertar
-    username = "gonza_operador"
-    password = "password123"  # Cambia esto por una contraseña real
-    email = "gonza@empresa.com"
-    rostro_path = r"C:\Users\gonza\Desktop\TP-Inicial\rostros\capture.png"  # Ruta relativa o absoluta
+    username = "gonza02_operador"
+    password = "password1233"  # Cambia esto por una contraseña real
+    email = "gonza1212@empresa.com"
+    rostro_path = r"C:\Users\gonza\Desktop\TP-Inicial\rostros\captura.png"  # Ruta relativa o absoluta
     role = "operador"
 
     try:
