@@ -20,12 +20,12 @@ app.secret_key = "supersecretkey"  # necesario para sesiones
 app.register_blueprint(visualizacion_bp, url_prefix="/visualizacion")
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-SAVE_DIR = os.path.join(BASE_DIR, "data")
+SAVE_DIR = os.path.join(BASE_DIR, "Data")
 ROSTROS_DIR = os.path.join(BASE_DIR, "rostros")
 os.makedirs(SAVE_DIR, exist_ok=True)
 
 
-DB_PATH = os.path.join(BASE_DIR, "data", "usuarios.db")
+DB_PATH = os.path.join(BASE_DIR, "Data", "usuarios.db")
 
 def init_db():
     conn = sqlite3.connect(DB_PATH)
@@ -71,12 +71,12 @@ def login():
     if user:
         session["user"] = username
         session["role"] = user[5]  # El Rol es la 6ta columna en nuestra tabla SQL *
-    
+
         # Si venía de login facial, marcar autenticación completa
         if session.get("pending_face_user"):
             session["authenticated"] = True
             session.pop("pending_face_user", None)
-    
+
         return redirect(url_for("dashboard"))
     else:
         error = "❌ Usuario o contraseña incorrectos"

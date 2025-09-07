@@ -28,7 +28,7 @@ files = {
     'proveedores': 'proveedores.csv',
     'stock': 'stock.csv',
     'trazabilidad': 'trazabilidad_lotes.csv',
-    'transporte': 'carga_transporte.csv'
+    'transporte': 'carga_transporte.csv',
 }
 
 # Bucle para leer cada archivo y guardarlo en el diccionario de dataframes
@@ -231,6 +231,7 @@ def mostrar_horarios():
 # Función para procesar datos de stock
 def procesar_datos_stock():
     if 'stock' not in dataframes:
+        print("holaaaaaaa")
         return None, None, None, None
 
     df = dataframes['stock'].copy()
