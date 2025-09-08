@@ -10,6 +10,11 @@
         .navbar-brand {
             font-weight: bold;
         }
+        .navbar .nav-link.active {
+            color: #fff !important;
+            font-weight: bold;
+            text-shadow: 0 0 6px rgba(255, 255, 255, 0.8);
+        }
         .card {
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
             transition: 0.3s;
@@ -58,39 +63,52 @@
                 <ul class="navbar-nav ms-auto">
                     {% if session.role == "ADMIN" %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('visualizacion.index') }}">
+                            <a class="nav-link {% if request.endpoint == 'visualizacion.index' %}active fw-bold{% endif %}" 
+                            href="{{ url_for('visualizacion.index') }}">
                                 <i class="bi bi-house"></i> Inicio
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('visualizacion.mostrar_desperdicios') }}">
+                            <a class="nav-link {% if request.endpoint == 'visualizacion.mostrar_desperdicios' %}active fw-bold{% endif %}" 
+                            href="{{ url_for('visualizacion.mostrar_desperdicios') }}">
                                 <i class="bi bi-bar-chart"></i> Desperdicios
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('visualizacion.mostrar_horarios') }}">
+                            <a class="nav-link {% if request.endpoint == 'visualizacion.mostrar_horarios' %}active fw-bold{% endif %}" 
+                            href="{{ url_for('visualizacion.mostrar_horarios') }}">
                                 <i class="bi bi-clock"></i> Horarios
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="/admin">
+                            <a class="nav-link {% if request.endpoint == 'admin' %}active fw-bold{% endif %}" 
+                            href="/admin">
                                 <i class="bi bi-shield-check"></i> Control Accesos
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('visualizacion.mostrar_inventario') }}">
+                            <a class="nav-link {% if request.endpoint == 'visualizacion.mostrar_inventario' %}active fw-bold{% endif %}" 
+                            href="{{ url_for('visualizacion.mostrar_inventario') }}">
                                 <i class="bi bi-boxes"></i> Inventario
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('visualizacion.mostrar_oee') }}">
+                            <a class="nav-link {% if request.endpoint == 'visualizacion.mostrar_oee' %}active fw-bold{% endif %}" 
+                            href="{{ url_for('visualizacion.mostrar_oee') }}">
                                 <i class="bi bi-speedometer2"></i> OEE
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.endpoint == 'register' %}active fw-bold{% endif %}" 
+                            href="{{ url_for('register') }}">
+                                <i class="bi bi-person-plus"></i> Registrar
                             </a>
                         </li>
                     {% else %}
                         <!-- Operador: solo acceso a Inventario -->
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('visualizacion.mostrar_inventario') }}">
+                            <a class="nav-link {% if request.endpoint == 'visualizacion.mostrar_inventario' %}active fw-bold{% endif %}" 
+                            href="{{ url_for('visualizacion.mostrar_inventario') }}">
                                 <i class="bi bi-boxes"></i> Inventario
                             </a>
                         </li>

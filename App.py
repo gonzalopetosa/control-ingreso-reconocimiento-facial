@@ -385,8 +385,6 @@ def register_face():
 
 @app.route("/register_face_reject", methods=["POST"])
 def register_face_reject():
-    error = "❌ No se pudo registrar el rostro del usuario"
-    # Elimina el usuario temporal si lo deseas
     username = session.get("user", None)
     if username:
         conn = sqlite3.connect(DB_PATH)
@@ -395,7 +393,7 @@ def register_face_reject():
         conn.commit()
         conn.close()
         session.pop("user", None)
-    return render_template("register.html", error=error)
+    return render_template("register.html", rejected=True)
 
 @app.route("/dashboard")
 @facial_auth_required

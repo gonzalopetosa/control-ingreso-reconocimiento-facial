@@ -1,294 +1,173 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <title>PyME Alimenticia - Registro</title>
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      height: 100vh;
-      background: #23232b;
-      font-family: 'Arial', sans-serif;
-      position: relative;
-      overflow: hidden;
-    }
-    .circle {
-      position: absolute;
-      border-radius: 50%;
-      background: #3d3df7;
-      left: -150px;
-      top: 50px;
-      width: 500px;
-      height: 500px;
-      z-index: 0;
-    }
-    .small-circle {
-      position: absolute;
-      border-radius: 50%;
-      background: #7ed6fc;
-      right: 120px;
-      bottom: 120px;
-      width: 50px;
-      height: 50px;
-      z-index: 1;
-    }
-    .big-circle {
-      position: absolute;
-      border-radius: 50%;
-      background: #3d3df7;
-      right: -250px;
-      bottom: -100px;
-      width: 500px;
-      height: 500px;
-      z-index: 0;
-    }
-    .stripes {
-      position: absolute;
-      left: 0;
-      top: 0;
-      z-index: 0;
-    }
-    .login-container {
-      position: relative;
-      z-index: 2;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-    }
-    .login-box {
-      background: #2c2c36;
-      padding: 40px 50px;
-      border-radius: 20px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-      text-align: center;
-      min-width: 350px;
-    }
-    .login-box h1 {
-      color: #fff;
-      font-size: 2.5em;
-      margin-bottom: 0;
-      font-family: 'Georgia', serif;
-    }
-    .login-box h2 {
-      color: #bdbdbd;
-      font-size: 1.2em;
-      margin-top: 0;
-      margin-bottom: 30px;
-      font-weight: normal;
-    }
-    .login-box input {
-      display: block;
-      width: 100%;
-      margin: 15px 0;
-      padding: 12px;
-      border: none;
-      border-bottom: 2px solid #3d3df7;
-      background: transparent;
-      color: #fff;
-      font-size: 1em;
-      outline: none;
-    }
-    .login-box input::placeholder {
-      color: #bdbdbd;
-    }
-    .login-box .register-btn {
-      width: 100%;
-      padding: 12px 0;
-      background: #3d3df7;
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      font-size: 1.1em;
-      cursor: pointer;
-      margin-bottom: 20px;
-      transition: background 0.2s;
-    }
-    .login-box .register-btn:hover {
-      background: #2323b7;
-    }
-    .face-btn {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 10px auto;
-      cursor: pointer;
-      background: none;
-      border: none;
-      outline: none;
-    }
-    .face-icon {
-      width: 100px;
-      height: 100px;
-      border-radius: 50%;
-      border: 5px solid #fff;
-      background: #23232b;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: transform 0.2s, border-color 0.2s;
-    }
-    .face-btn:hover .face-icon {
-      transform: scale(1.07);
-      border-color: #3d3df7;
-    }
-    .face-svg {
-      width: 60px;
-      height: 60px;
-      display: block;
-    }
-    .login-box .face-label {
-      color: #bdbdbd;
-      font-size: 1em;
-      margin-bottom: 10px;
-    }
-    .terms {
-      font-size: 0.8em;
-      color: #bdbdbd;
-      margin-top: -10px;
-      margin-bottom: 10px;
-    }
-    .terms span {
-      color: #a259f7;
-    }
-    video, canvas { display: none; }
-  </style>
-</head>
-<body>
-  <div class="circle"></div>
-  <div class="big-circle"></div>
-  <div class="small-circle"></div>
-  <div class="stripes">
-    <svg width="300" height="300">
-      <polygon points="0,0 200,0 0,200" fill="#3d3df7"/>
-      <polygon points="0,0 250,0 0,250" fill="#23232b"/>
-      <polygon points="0,0 300,0 0,300" fill="#3d3df7"/>
-      <polygon points="0,0 150,0 0,150" fill="#23232b"/>
-      <polygon points="0,0 100,0 0,100" fill="#3d3df7"/>
-    </svg>
-  </div>
-  <div class="login-container">
-    <div class="login-box">
-      <h1>PyME <span style="font-size:0.7em; color:#bdbdbd;">Alimenticia</span></h1>
-      <form method="POST" action="/register">
-        <input type="text" name="username" placeholder="Usuario" required>
-        <input type="password" name="password" placeholder="Contraseña" required>
-        <input type="password" name="confirm_password" placeholder="Confirmar contraseña" required>
-        <input type="email" name="email" placeholder="Email" required>
-	
-  	<select name="role" required style="display:block;width:100%;margin:15px 0;padding:12px;border:none;border-bottom:2px solid #3d3df7;background:transparent;color:#fff;font-size:1em;">
-    		<option value="operador" selected>Operador</option>
-    		<option value="ADMIN">ADMIN</option>
-  	</select>
+{% extends "base.html" %}
 
-        <button type="submit" class="register-btn">Registrarse</button>
-        {% if error %}
-          <div style="color:#a259f7; margin-top:10px;">{{ error }}</div>
-        {% endif %}
-        {% if success %}
-          <div style="color:#3d3df7; margin-top:10px;">{{ success }}</div>
-        {% endif %}
-        {% if require_face %}
-          <div id="face-modal" style="position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(30,30,40,0.95);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;">
-            <div style="background:#23232b;padding:30px 40px;border-radius:16px;box-shadow:0 4px 20px #000;text-align:center;">
-              <h2 style="color:#fff;">Registro facial requerido</h2>
-              <p style="color:#bdbdbd;">Para finalizar tu registro, necesitamos capturar tu rostro.<br>¿Deseas continuar?</p>
-              <button onclick="startFaceRegister()" style="margin:10px 20px 0 0;padding:10px 30px;background:#3d3df7;color:#fff;border:none;border-radius:8px;cursor:pointer;">Aceptar</button>
-              <button onclick="rejectFaceRegister()" style="margin:10px 0 0 0;padding:10px 30px;background:#a259f7;color:#fff;border:none;border-radius:8px;cursor:pointer;">Rechazar</button>
-              <div id="face-error" style="color:#a259f7;margin-top:15px;"></div>
-            </div>
-            <video id="video" width="320" height="240" autoplay style="display:none;"></video>
-            <canvas id="canvas" width="320" height="240" style="display:none;"></canvas>
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6">
+    <div class="card shadow-lg">
+      <div class="card-body">
+        <h2 class="card-title text-center mb-4">Registro de Usuario</h2>
+
+        <form method="POST" action="/register">
+          <div class="mb-3">
+            <label for="username" class="form-label">Usuario</label>
+            <input type="text" id="username" name="username" class="form-control" required>
           </div>
-        {% endif %}
-      </form>
-      <button class="face-btn" onclick="captureFace()">
-        <div class="face-icon">
-          <!-- SVG de cara estilo minimalista -->
-          <svg class="face-svg" viewBox="0 0 60 60">
-            <circle cx="30" cy="30" r="28" stroke="#fff" stroke-width="2" fill="none"/>
-            <circle cx="20" cy="25" r="4" fill="#fff"/>
-            <circle cx="40" cy="25" r="4" fill="#fff"/>
-            <circle cx="30" cy="38" r="2" fill="#fff"/>
-            <path d="M20 40 Q30 50 40 40" stroke="#fff" stroke-width="2" fill="none"/>
-          </svg>
-        </div>
-      </button>
-      <div class="terms">
-        Al hacer clic en Registrarse, aceptás los <span>Términos de servicio</span> de nuestra página y reconocés que se aplica nuestro <span>Aviso de privacidad</span>.
+
+          <div class="mb-3">
+            <label for="password" class="form-label">Contraseña</label>
+            <input type="password" id="password" name="password" class="form-control" required>
+          </div>
+
+          <div class="mb-3">
+            <label for="confirm_password" class="form-label">Confirmar contraseña</label>
+            <input type="password" id="confirm_password" name="confirm_password" class="form-control" required>
+          </div>
+
+          <div class="mb-3">
+            <label for="email" class="form-label">Correo electrónico</label>
+            <input type="email" id="email" name="email" class="form-control" required>
+          </div>
+
+          <div class="mb-3">
+            <label for="role" class="form-label">Rol</label>
+            <select name="role" id="role" class="form-select" required>
+              <option value="operador" selected>Operador</option>
+              <option value="ADMIN">ADMIN</option>
+            </select>
+          </div>
+
+          <button type="submit" class="btn btn-primary w-100">Registrarse</button>
+
+          {% if error %}
+            <div class="alert alert-danger mt-3">{{ error }}</div>
+          {% endif %}
+          {% if rejected %}
+            <div class="alert alert-danger mt-3">
+              ❌ El registro no se pudo completar ya que se rechazó el registro del rostro.
+            </div>
+          {% endif %}
+          {% if success and not require_face %}
+            <div class="alert alert-success mt-3">{{ success }}</div>
+          {% endif %}
+        </form>
       </div>
     </div>
   </div>
-  <script>
-    const video = document.getElementById('video');
-    const canvas = document.getElementById('canvas');
-    const context = canvas.getContext('2d');
+</div>
 
-    navigator.mediaDevices.getUserMedia({ video: true })
-      .then(stream => { video.srcObject = stream; })
-      .catch(err => console.error("Error al acceder a la cámara: ", err));
+<!-- Modal de Registro Facial -->
+<div class="modal fade" id="faceModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Registro facial requerido</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body text-center">
+        <p>Para finalizar tu registro, necesitamos capturar tu rostro.</p>
+        <video id="video" width="320" height="240" autoplay class="d-none"></video>
+        <canvas id="canvas" width="320" height="240" class="d-none"></canvas>
+        <div id="face-message" class="mt-3 text-danger"></div>
+      </div>
+      <div class="modal-footer">
+        <button id="rejectBtn" class="btn btn-secondary">Rechazar</button>
+        <button id="acceptBtn" class="btn btn-primary">Aceptar</button>
+      </div>
+    </div>
+  </div>
+</div>
 
-    function captureFace() {
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const video = document.getElementById("video");
+    const canvas = document.getElementById("canvas");
+    const context = canvas.getContext("2d");
+    const faceMessage = document.getElementById("face-message");
+    const acceptBtn = document.getElementById("acceptBtn");
+    const rejectBtn = document.getElementById("rejectBtn");
+
+    {% if require_face %}
+      const modal = new bootstrap.Modal(document.getElementById("faceModal"));
+      modal.show();
+    {% endif %}
+
+    async function startCamera() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        video.srcObject = stream;
+        video.classList.remove("d-none");
+      } catch (err) {
+        faceMessage.textContent = "❌ No se pudo acceder a la cámara.";
+      }
+    }
+
+    function captureAndSend() {
       context.drawImage(video, 0, 0, canvas.width, canvas.height);
-      const imageData = canvas.toDataURL('image/png');
-      fetch('/register_face', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const imageData = canvas.toDataURL("image/png");
+
+      fetch("/register_face", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ image: imageData })
       })
-      .then(res => res.text())
-      .then(data => alert(data))
-      .catch(err => console.error(err));
-    }
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          document.querySelector(".modal-body").innerHTML = `
+            <div class="alert alert-success">${data.success}<br>
+            <small>Este mensaje se cerrará automáticamente en 5 segundos.</small></div>
+          `;
+          document.querySelector(".modal-footer").remove();
 
-    function startFaceRegister() {
-      document.getElementById('video').style.display = 'block';
-      navigator.mediaDevices.getUserMedia({ video: true })
-        .then(stream => {
-          const video = document.getElementById('video');
-          video.srcObject = stream;
           setTimeout(() => {
-            const canvas = document.getElementById('canvas');
-            const context = canvas.getContext('2d');
-            context.drawImage(video, 0, 0, canvas.width, canvas.height);
-            const imageData = canvas.toDataURL('image/png');
-            fetch('/register_face', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ image: imageData })
-            })
-            .then(res => res.json())
-            .then(data => {
-              if (data.success) {
-                document.getElementById('face-modal').innerHTML = `
-                  <div style="color:#3d3df7;font-size:1.2em;">${data.success}</div>
-                  <button onclick="window.location.href='/'" style="margin-top:20px;padding:10px 30px;background:#3d3df7;color:#fff;border:none;border-radius:8px;cursor:pointer;">Iniciar Sesión</button>
-                `;
-              } else if (data.error) {
-                document.getElementById('face-error').innerText = data.error;
-              }
-            })
-            .catch(() => {
-              document.getElementById('face-error').innerText = "❌ No se pudo registrar el rostro del usuario";
-            });
-          }, 1500);
-        })
-        .catch(() => {
-          document.getElementById('face-error').innerText = "❌ No se pudo acceder a la cámara";
-        });
-    }
+            const modalElement = document.getElementById("faceModal");
+            const modalInstance = bootstrap.Modal.getInstance(modalElement);
+            modalInstance.hide();
+          }, 5000);
+        } else if (data.error) {
+          faceMessage.textContent = data.error;
 
-    function rejectFaceRegister() {
-      fetch('/register_face_reject', {
-        method: 'POST'
+          const footer = document.querySelector(".modal-footer");
+          if (data.error.toLowerCase().includes("rostro ya está registrado")) {
+            // Caso especial: se eliminó el usuario temporal, no tiene sentido reintentar
+            footer.innerHTML = `
+              <button class="btn btn-secondary" onclick="window.location.href='{{ url_for('register') }}'">Volver al registro</button>
+            `;
+          } else {
+            // Otros errores: ofrecer reintento
+            footer.innerHTML = `
+              <button class="btn btn-secondary" id="retryBtn">Volver a intentar</button>
+            `;
+            document.getElementById("retryBtn").addEventListener("click", () => {
+              faceMessage.textContent = "";
+              startCamera();
+              setTimeout(captureAndSend, 2000);
+            });
+          }
+        }
       })
-      .then(response => response.text())
-      .then(html => {
-        document.body.innerHTML = html;
+      .catch(() => {
+        faceMessage.textContent = "❌ Error en el registro facial.";
       });
     }
-  </script>
-</body>
-</html>
+
+    if (acceptBtn) {
+      acceptBtn.addEventListener("click", () => {
+        faceMessage.textContent = "";
+        startCamera();
+        setTimeout(captureAndSend, 2000);
+      });
+    }
+
+    if (rejectBtn) {
+      rejectBtn.addEventListener("click", () => {
+        fetch("/register_face_reject", { method: "POST" })
+          .then(res => res.text())
+          .then(html => {
+            document.body.innerHTML = html;
+          });
+      });
+    }
+  });
+</script>
+{% endblock %}
