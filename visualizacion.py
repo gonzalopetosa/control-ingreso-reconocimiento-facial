@@ -354,7 +354,7 @@ def mostrar_inventario():
     productos_vencidos = len(df_stock[df_stock['dias_hasta_vencer'] < 0])
     productos_por_vencer = len(productos_proximos)
 
-    return render_template('inventario.html',
+    return render_template('Inventario.html',
                           plot_url1=plot_url1,
                           plot_url2=plot_url2,
                           plot_url3=plot_url3,
