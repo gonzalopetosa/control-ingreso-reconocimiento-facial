@@ -120,9 +120,7 @@
           document.querySelector(".modal-footer").remove();
 
           setTimeout(() => {
-            const modalElement = document.getElementById("faceModal");
-            const modalInstance = bootstrap.Modal.getInstance(modalElement);
-            modalInstance.hide();
+            window.location.href = data.redirect;
           }, 5000);
         } else if (data.error) {
           faceMessage.textContent = data.error;

@@ -11,7 +11,7 @@ from flask import redirect, url_for
 from decorators import facial_auth_required, role_required
 from visualizacion import visualizacion_bp
 import csv
-
+import json
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"  # necesario para sesiones
@@ -37,7 +37,8 @@ def init_db():
         password TEXT NOT NULL,
         email TEXT NOT NULL,
         rostro_path TEXT,
-        role TEXT NOT NULL DEFAULT 'operador'
+        role TEXT NOT NULL DEFAULT 'operador',
+        encoding TEXT
     )
 """)
     conn.commit()
@@ -95,26 +96,25 @@ def login_face():
     face_encodings = face_recognition.face_encodings(frame)
     if not face_encodings:
         return jsonify({"success": False, "message": "❌ No se detectó rostro en la imagen"})
+    input_encoding = face_encodings[0]
 
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
-    c.execute("SELECT username, rostro_path, role FROM usuarios WHERE rostro_path IS NOT NULL")
+    c.execute("SELECT username, encoding, role FROM usuarios WHERE encoding IS NOT NULL")
     rostros = c.fetchall()
     conn.close()
 
     usuario_identificado = None
 
-    for username, rostro_filename, role in rostros:
-        path = os.path.join(ROSTROS_DIR, rostro_filename)
-        if os.path.exists(path):
-            known_image = face_recognition.load_image_file(path)
-            known_encodings = face_recognition.face_encodings(known_image)
-            if known_encodings and face_recognition.compare_faces([known_encodings[0]], face_encodings[0])[0]:
+    for username, encoding_json, role in rostros:
+        if encoding_json:
+            known_encoding = np.array(json.loads(encoding_json))
+            match = face_recognition.compare_faces([known_encoding], input_encoding, tolerance=0.6)
+            if match[0]:
                 usuario_identificado = username
                 break
 
     if usuario_identificado:
-        # Guardar en sesión el usuario detectado, pero sin loguear todavía
         session["pending_face_user"] = usuario_identificado
         return jsonify({
             "success": True,
@@ -340,48 +340,17 @@ def register_face():
         return jsonify({"error": "No se detectó rostro en la imagen"}), 400
     new_encoding = new_encodings[0]
 
-    # Buscar si el rostro ya está registrado
+    # Guardar encoding como JSON en DB
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
-    c.execute("SELECT username, rostro_path FROM usuarios WHERE rostro_path IS NOT NULL")
-    rostros = c.fetchall()
-
-    # Definir un umbral de similitud
-    umbral = 0.5  # Ajustable entre 0.4 y 0.6 según necesidad
-
-    for user, path in rostros:
-        full_path = os.path.join(ROSTROS_DIR, path)
-        if os.path.exists(full_path):
-            known_image = face_recognition.load_image_file(full_path)
-            known_encodings = face_recognition.face_encodings(known_image)
-            if known_encodings:
-                distance = face_recognition.face_distance([known_encodings[0]], new_encoding)[0]
-                if distance < umbral:
-                    # ❌ Eliminar usuario temporal porque el rostro ya existe
-                    conn2 = sqlite3.connect(DB_PATH)
-                    c2 = conn2.cursor()
-                    c2.execute("DELETE FROM usuarios WHERE username=?", (username,))
-                    conn2.commit()
-                    conn2.close()
-                    session.pop("user", None)
-                    conn.close()
-                    return jsonify({"error": "❌ El rostro ya está registrado en el sistema"}), 400
-
-    # Guardar imagen en disco
-    rostro_filename = f"{username}_{datetime.now().strftime('%Y%m%d%H%M%S')}.png"
-    rostro_path = os.path.join(ROSTROS_DIR, rostro_filename)
-    with open(rostro_path, "wb") as f:
-        f.write(image_bytes)
-
-    # Guardar ruta en la base de datos
-    c.execute("UPDATE usuarios SET rostro_path=? WHERE username=?", (rostro_filename, username))
+    c.execute("UPDATE usuarios SET encoding=? WHERE username=?", (json.dumps(new_encoding.tolist()), username))
     conn.commit()
     conn.close()
 
     return jsonify({
-        "success": "✅ Te registraste correctamente.",
-        "show_login": True
-    })
+    "success": "✅ Te registraste correctamente.",
+    "redirect": url_for("index")  # index() ya renderiza login.html
+})
 
 @app.route("/register_face_reject", methods=["POST"])
 def register_face_reject():
