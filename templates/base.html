@@ -81,12 +81,6 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link {% if request.endpoint == 'admin' %}active fw-bold{% endif %}" 
-                            href="/admin">
-                                <i class="bi bi-shield-check"></i> Control Accesos
-                            </a>
-                        </li>
-                        <li class="nav-item">
                             <a class="nav-link {% if request.endpoint == 'visualizacion.mostrar_inventario' %}active fw-bold{% endif %}" 
                             href="{{ url_for('visualizacion.mostrar_inventario') }}">
                                 <i class="bi bi-boxes"></i> Inventario
