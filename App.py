@@ -40,7 +40,19 @@ def init_db():
         role TEXT NOT NULL DEFAULT 'operador',
         encoding TEXT
     )
-""")
+    """)
+    c.execute("""
+    CREATE TABLE IF NOT EXISTS registros (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id_empleado INTEGER,
+        username TEXT NOT NULL,
+        fecha TEXT NOT NULL,
+        hora_ingreso TEXT,
+        hora_egreso TEXT,
+        area TEXT,
+        FOREIGN KEY (id_empleado) REFERENCES usuarios(id)
+    )
+    """)
     conn.commit()
     conn.close()
 
@@ -130,84 +142,42 @@ def registrar_ingreso_automatico(username):
     fecha_actual = ahora.strftime("%d/%m/%Y")
     hora_actual = ahora.strftime("%H:%M")
 
-    # Obtener información del usuario desde la base de datos
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
-    c.execute("SELECT id, username FROM usuarios WHERE username = ?", (username,))
+
+    # Buscar usuario
+    c.execute("SELECT id FROM usuarios WHERE username = ?", (username,))
     usuario = c.fetchone()
-    conn.close()
-
-    if usuario:
-        user_id, username = usuario
-
-        # Leer el archivo CSV existente
-        csv_path = os.path.join(SAVE_DIR, "ingresos_egresos.csv")
-        registros = []
-        fieldnames = ['id_registro', 'id_empleado', 'nombre', 'apellido',
-                     'fecha', 'hora_ingreso', 'hora_egreso', 'area']
-
-        # Verificar si el archivo existe y leerlo
-        file_exists = os.path.exists(csv_path)
-
-        if file_exists:
-            try:
-                with open(csv_path, 'r', newline='', encoding='utf-8') as csvfile:
-                    reader = csv.DictReader(csvfile)
-                    # Verificar que el archivo tenga el formato correcto
-                    if reader.fieldnames == fieldnames:
-                        registros = list(reader)
-                    else:
-                        # Si el formato no coincide, empezar desde cero
-                        registros = []
-            except Exception as e:
-                print(f"❌ Error leyendo el archivo CSV: {e}")
-                registros = []
-
-        # Verificar si ya existe un registro de ingreso hoy sin egreso
-        tiene_ingreso_sin_egreso = False
-        for registro in registros:
-            if (registro.get('nombre') == username and
-                registro.get('fecha') == fecha_actual and
-                registro.get('hora_ingreso', '') != '' and
-                registro.get('hora_egreso', '') == ''):
-                tiene_ingreso_sin_egreso = True
-                break
-
-        if not tiene_ingreso_sin_egreso:
-            # Crear nuevo registro
-            nuevo_id = len(registros) + 1 if registros else 1
-
-            nuevo_registro = {
-                'id_registro': str(nuevo_id),
-                'id_empleado': str(user_id),
-                'nombre': username,
-                'apellido': '',
-                'fecha': fecha_actual,
-                'hora_ingreso': hora_actual,
-                'hora_egreso': '',
-                'area': 'Sistema'
-            }
-
-            registros.append(nuevo_registro)
-
-            # Escribir todos los registros al CSV
-            try:
-                with open(csv_path, 'w', newline='', encoding='utf-8') as csvfile:
-                    writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-                    writer.writeheader()
-                    writer.writerows(registros)
-
-                print(f"✅ Ingreso registrado automáticamente para {username} a las {hora_actual}")
-                return True
-            except Exception as e:
-                print(f"❌ Error escribiendo en el archivo CSV: {e}")
-                return False
-        else:
-            print(f"ℹ️ {username} ya tiene un ingreso registrado hoy sin egreso")
-            return False
-    else:
+    if not usuario:
+        conn.close()
         print(f"❌ Usuario {username} no encontrado en la base de datos")
         return False
+
+    user_id = usuario[0]
+
+    # Verificar si ya existe un ingreso sin egreso hoy
+    c.execute("""
+        SELECT id FROM registros
+        WHERE id_empleado=? AND fecha=? AND hora_ingreso IS NOT NULL 
+        AND (hora_egreso IS NULL OR hora_egreso='')
+    """, (user_id, fecha_actual))
+    existe = c.fetchone()
+
+    if existe:
+        conn.close()
+        print(f"ℹ️ {username} ya tiene un ingreso registrado hoy sin egreso")
+        return False
+
+    # Insertar nuevo ingreso
+    c.execute("""
+        INSERT INTO registros (id_empleado, username, fecha, hora_ingreso, area)
+        VALUES (?, ?, ?, ?, ?)
+    """, (user_id, username, fecha_actual, hora_actual, "Sistema"))
+    conn.commit()
+    conn.close()
+
+    print(f"✅ Ingreso registrado automáticamente para {username} a las {hora_actual}")
+    return True
 
 # Agregar esta función para registrar egreso
 def registrar_egreso_automatico(username):
@@ -215,55 +185,30 @@ def registrar_egreso_automatico(username):
     fecha_actual = ahora.strftime("%d/%m/%Y")
     hora_actual = ahora.strftime("%H:%M")
 
-    # Leer el archivo CSV
-    csv_path = os.path.join(SAVE_DIR, "ingresos_egresos.csv")
-    fieldnames = ['id_registro', 'id_empleado', 'nombre', 'apellido',
-                 'fecha', 'hora_ingreso', 'hora_egreso', 'area']
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
 
-    if not os.path.exists(csv_path):
-        print("❌ No hay registros de ingreso para registrar egreso")
-        return False
+    # Buscar el último ingreso del día sin egreso
+    c.execute("""
+        SELECT id FROM registros
+        WHERE username=? AND fecha=? AND hora_ingreso IS NOT NULL 
+        AND (hora_egreso IS NULL OR hora_egreso='')
+        ORDER BY id DESC LIMIT 1
+    """, (username, fecha_actual))
+    registro = c.fetchone()
 
-    try:
-        with open(csv_path, 'r', newline='', encoding='utf-8') as csvfile:
-            reader = csv.DictReader(csvfile)
-            # Verificar que el archivo tenga el formato correcto
-            if reader.fieldnames != fieldnames:
-                print("❌ Formato incorrecto del archivo CSV")
-                return False
-            registros = list(reader)
-    except Exception as e:
-        print(f"❌ Error leyendo el archivo CSV: {e}")
-        return False
-
-    # Buscar el último registro del usuario para hoy sin egreso
-    registro_actualizado = False
-    for registro in registros:
-        if (registro.get('nombre') == username and
-            registro.get('fecha') == fecha_actual and
-            registro.get('hora_ingreso', '') != '' and
-            registro.get('hora_egreso', '') == ''):
-
-            registro['hora_egreso'] = hora_actual
-            registro_actualizado = True
-            break
-
-    if registro_actualizado:
-        # Escribir los registros actualizados
-        try:
-            with open(csv_path, 'w', newline='', encoding='utf-8') as csvfile:
-                writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-                writer.writeheader()
-                writer.writerows(registros)
-
-            print(f"✅ Egreso registrado automáticamente para {username} a las {hora_actual}")
-            return True
-        except Exception as e:
-            print(f"❌ Error escribiendo en el archivo CSV: {e}")
-            return False
-    else:
+    if not registro:
+        conn.close()
         print(f"⚠️ No se encontró ingreso pendiente de egreso para {username}")
         return False
+
+    # Actualizar con hora de egreso
+    c.execute("UPDATE registros SET hora_egreso=? WHERE id=?", (hora_actual, registro[0]))
+    conn.commit()
+    conn.close()
+
+    print(f"✅ Egreso registrado automáticamente para {username} a las {hora_actual}")
+    return True
 
 # Modificar la ruta de logout
 @app.route("/logout")
