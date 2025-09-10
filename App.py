@@ -83,14 +83,18 @@ def login():
 
     if user:
         session["user"] = username
-        session["role"] = user[5]  # El Rol es la 6ta columna en nuestra tabla SQL *
+        session["role"] = user[5]
 
-        # Si venía de login facial, marcar autenticación completa
+        # Registrar ingreso automático
+        registrar_ingreso_automatico(username)
+
+        # Si venía de login facial...
         if session.get("pending_face_user"):
             session["authenticated"] = True
             session.pop("pending_face_user", None)
 
         return redirect(url_for("dashboard"))
+
     else:
         error = "❌ Usuario o contraseña incorrectos"
         return render_template("login.html", error=error)
@@ -189,6 +193,7 @@ def registrar_egreso_automatico(username):
     c = conn.cursor()
 
     # Buscar el último ingreso del día sin egreso
+    print(f"🔍 Buscando ingreso sin egreso para {username} en {fecha_actual}")
     c.execute("""
         SELECT id FROM registros
         WHERE username=? AND fecha=? AND hora_ingreso IS NOT NULL 
@@ -196,6 +201,7 @@ def registrar_egreso_automatico(username):
         ORDER BY id DESC LIMIT 1
     """, (username, fecha_actual))
     registro = c.fetchone()
+    print(f"Resultado de búsqueda: {registro}")
 
     if not registro:
         conn.close()
